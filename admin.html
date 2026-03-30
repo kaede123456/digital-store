@@ -89,7 +89,23 @@ tr:hover { background: #fafafa; }
 
   <div class="toolbar">
     <div class="search-box"><span>🔍</span><input type="text" placeholder="搜索商品..." oninput="renderTable()"></div>
-    <button class="add-btn" onclick="openForm()">+ 添加商品</button>
+    <button class="add-btn" onclick="openKfModal()">⚙️ 设置客服微信</button>
+  </div>
+  
+  <!-- 客服微信设置弹窗 -->
+  <div class="modal" id="kfModal">
+    <div class="form-box" style="max-width:400px;">
+      <div class="form-header"><h2>客服设置</h2><button class="form-close" onclick="closeKfModal()">×</button></div>
+      <div class="form-group">
+        <label>客服微信</label>
+        <input type="text" id="kfWechatInput" placeholder="请输入你的微信号">
+        <div class="tip">用户付款后将显示此微信</div>
+      </div>
+      <div class="form-btns">
+        <button class="btn-cancel" onclick="closeKfModal()">取消</button>
+        <button class="btn-save" onclick="saveKfWechat()">保存</button>
+      </div>
+    </div>
   </div>
 
   <div class="table-box">
@@ -300,7 +316,33 @@ function showToast(msg) {
 }
 
 document.getElementById('modal').addEventListener('click', e => { if (e.target === document.getElementById('modal')) closeForm(); });
+
+// 客服微信设置
+function initKfWechat() {
+  const kf = localStorage.getItem('kfWechat') || '';
+  const display = document.getElementById('kfWechatDisplay');
+  if (display) display.textContent = kf || '未设置';
+}
+
+function openKfModal() {
+  document.getElementById('kfWechatInput').value = localStorage.getItem('kfWechat') || '';
+  document.getElementById('kfModal').classList.add('show');
+}
+
+function closeKfModal() { document.getElementById('kfModal').classList.remove('show'); }
+
+function saveKfWechat() {
+  const wechat = document.getElementById('kfWechatInput').value.trim();
+  localStorage.setItem('kfWechat', wechat);
+  initKfWechat();
+  closeKfModal();
+  showToast('保存成功');
+}
+
+document.getElementById('kfModal').addEventListener('click', e => { if (e.target === document.getElementById('kfModal')) closeKfModal(); });
+
 init();
+initKfWechat();
 </script>
 </body>
 </html>
