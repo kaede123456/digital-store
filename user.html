@@ -58,7 +58,6 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif
 .pay-qr-tip { font-size: 13px; color: #999; margin-bottom: 20px; }
 .pay-qr-amount { font-size: 28px; font-weight: 600; color: #e54d00; margin-bottom: 20px; }
 .done-btn { width: 100%; background: #52c41a; color: #fff; border: none; padding: 14px; border-radius: 8px; font-size: 15px; font-weight: 500; cursor: pointer; margin-top: 20px; }
-.done-btn:disabled { background: #ccc; cursor: not-allowed; }
 /* 成功 */
 .success-box { background: #fff; width: 100%; max-width: 340px; border-radius: 16px; padding: 32px 24px; text-align: center; }
 .success-icon { width: 60px; height: 60px; background: #52c41a; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; color: #fff; margin: 0 auto 16px; }
@@ -143,6 +142,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif
     <div style="background:#fff8e6;border-radius:8px;padding:12px;margin-top:16px;text-align:center;">
       <div style="font-size:13px;color:#fa8c16;">⚠️ 付款后请加客服微信发送付款截图</div>
     </div>
+    <button class="done-btn" onclick="confirmPaid()">✓ 已完成付款</button>
   </div>
 </div>
 
@@ -254,7 +254,8 @@ function confirmPaid() {
   }
   closePayPage();
   setTimeout(() => {
-    document.getElementById('successImg').textContent = currentProduct.img;
+    const kfWechat = localStorage.getItem('kfWechat') || '未设置';
+    document.getElementById('kfWechat').textContent = kfWechat;
     document.getElementById('successModal').classList.add('show');
   }, 500);
 }
