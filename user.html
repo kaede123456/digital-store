@@ -211,19 +211,15 @@ function closeDetail() { document.getElementById('detailPage').classList.remove(
 function openPay() { 
   document.getElementById('payModal').classList.add('show'); 
   
-  // 15秒倒计时
-  let countdown = 15;
+  // 15秒后才能点
   const btn = document.getElementById('doneBtn');
   btn.disabled = true;
-  btn.textContent = '请等待 ' + countdown + ' 秒';
+  let countdown = 15;
   window.payTimer = setInterval(() => {
     countdown--;
     if (countdown <= 0) {
       clearInterval(window.payTimer);
       btn.disabled = false;
-      btn.textContent = '我已付款';
-    } else {
-      btn.textContent = '请等待 ' + countdown + ' 秒';
     }
   }, 1000);
 }
