@@ -59,6 +59,9 @@ tr:hover { background: #fafafa; }
 .toast { position: fixed; top: 24px; left: 50%; transform: translateX(-50%) translateY(-20px); background: #333; color: #fff; padding: 12px 24px; border-radius: 8px; font-size: 14px; z-index: 9999; opacity: 0; pointer-events: none; transition: all 0.3s; }
 .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 .tip { font-size: 12px; color: #999; margin-top: 4px; }
+.upload-box { border: 2px dashed #e5e7eb; border-radius: 8px; padding: 20px; text-align: center; cursor: pointer; transition: all 0.2s; background: #fafafa; }
+.upload-box:hover { border-color: #e54d00; background: #fff8f5; }
+.upload-placeholder { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 10px; }
 @media (max-width: 768px) {
   .main { padding: 16px; }
   .form-row { grid-template-columns: 1fr; }
@@ -109,14 +112,28 @@ tr:hover { background: #fafafa; }
     <div class="form-group"><label>图标（emoji）</label><input type="text" id="pImg" placeholder="📐"></div>
     <div class="form-row">
       <div class="form-group">
-        <label>微信收款码图片URL</label>
-        <input type="text" id="pWechatPay" placeholder="微信收款码图片链接">
-        <div class="tip">在微信收款码小程序生成</div>
+        <label>微信收款码</label>
+        <div class="upload-box" onclick="document.getElementById('wechatUpload').click()">
+          <img id="wechatPreview" src="" style="display:none;max-width:100%;border-radius:8px;">
+          <div id="wechatPlaceholder" class="upload-placeholder">
+            <span style="font-size:24px;">💚</span>
+            <span style="font-size:12px;color:#999;margin-top:4px;">点击上传微信收款码</span>
+          </div>
+        </div>
+        <input type="file" id="wechatUpload" accept="image/*" style="display:none;" onchange="handleUpload(this, 'wechatPay')">
+        <input type="hidden" id="pWechatPay">
       </div>
       <div class="form-group">
-        <label>支付宝收款码图片URL</label>
-        <input type="text" id="pAlipay" placeholder="支付宝收款码图片链接">
-        <div class="tip">在支付宝收款码生成</div>
+        <label>支付宝收款码</label>
+        <div class="upload-box" onclick="document.getElementById('alipayUpload').click()">
+          <img id="alipayPreview" src="" style="display:none;max-width:100%;border-radius:8px;">
+          <div id="alipayPlaceholder" class="upload-placeholder">
+            <span style="font-size:24px;">💙</span>
+            <span style="font-size:12px;color:#999;margin-top:4px;">点击上传支付宝收款码</span>
+          </div>
+        </div>
+        <input type="file" id="alipayUpload" accept="image/*" style="display:none;" onchange="handleUpload(this, 'alipay')">
+        <input type="hidden" id="pAlipay">
       </div>
     </div>
     <div class="form-group"><label>发货图片URL（购买后发送）</label><input type="text" id="pFileUrl" placeholder="购买后发送的资料图片"></div>
@@ -184,6 +201,7 @@ function openForm(id) {
     document.getElementById('pFileUrl').value = p.fileUrl || '';
     document.getElementById('pDesc').value = p.desc;
     document.getElementById('delBtn').style.display = 'block';
+    showPreview(id); // 回显收款码图片
   } else {
     document.getElementById('formTitle').textContent = '添加商品';
     document.getElementById('pTitle').value = '';
@@ -200,6 +218,49 @@ function openForm(id) {
 }
 
 function closeForm() { document.getElementById('modal').classList.remove('show'); editingId = null; }
+
+// 图片上传处理（转base64）
+function handleUpload(input, type) {
+  const file = input.files[0];
+  if (!file) return;
+  
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const dataUrl = e.target.result;
+    if (type === 'wechatPay') {
+      document.getElementById('pWechatPay').value = dataUrl;
+      document.getElementById('wechatPreview').src = dataUrl;
+      document.getElementById('wechatPreview').style.display = 'block';
+      document.getElementById('wechatPlaceholder').style.display = 'none';
+    } else {
+      document.getElementById('pAlipay').value = dataUrl;
+      document.getElementById('alipayPreview').src = dataUrl;
+      document.getElementById('alipayPreview').style.display = 'block';
+      document.getElementById('alipayPlaceholder').style.display = 'none';
+    }
+  };
+  reader.readAsDataURL(file);
+}
+
+// 回显已上传的图片
+function showPreview(id) {
+  const p = products.find(x => x.id === id);
+  if (!p) return;
+  
+  if (p.wechatPay) {
+    document.getElementById('pWechatPay').value = p.wechatPay;
+    document.getElementById('wechatPreview').src = p.wechatPay;
+    document.getElementById('wechatPreview').style.display = 'block';
+    document.getElementById('wechatPlaceholder').style.display = 'none';
+  }
+  
+  if (p.alipay) {
+    document.getElementById('pAlipay').value = p.alipay;
+    document.getElementById('alipayPreview').src = p.alipay;
+    document.getElementById('alipayPreview').style.display = 'block';
+    document.getElementById('alipayPlaceholder').style.display = 'none';
+  }
+}
 
 function saveProduct() {
   const title = document.getElementById('pTitle').value.trim();
