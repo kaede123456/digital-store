@@ -7,307 +7,61 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
-body {
-  font-family: 'Inter', -apple-system, sans-serif;
-  background: #f0f2f5;
-  color: #1a1a1a;
-  min-height: 100vh;
-}
-/* 顶部导航 */
-.top-nav {
-  background: #fff;
-  padding: 0 24px;
-  height: 60px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  border-bottom: 1px solid #e5e7eb;
-  position: sticky;
-  top: 0;
-  z-index: 100;
-}
+body { font-family: 'Inter', -apple-system, sans-serif; background: #f0f2f5; color: #1a1a1a; min-height: 100vh; }
+.top-nav { background: #fff; padding: 0 24px; height: 60px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #e5e7eb; position: sticky; top: 0; z-index: 100; }
 .top-nav h1 { font-size: 18px; font-weight: 600; }
-.top-nav a { 
-  color: #666; 
-  text-decoration: none; 
-  font-size: 14px; 
-  padding: 8px 16px; 
-  border-radius: 6px;
-  background: #f5f5f5;
-  transition: all 0.2s;
-}
-.top-nav a:hover { background: #e5e7eb; }
-
-/* 主内容区 */
-.main {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 24px;
-}
-/* 统计卡片 */
-.stats {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 16px;
-  margin-bottom: 24px;
-}
-.stat-card {
-  background: #fff;
-  border-radius: 12px;
-  padding: 20px;
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-.stat-icon {
-  width: 48px;
-  height: 48px;
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 24px;
-}
+.top-nav a { color: #666; text-decoration: none; font-size: 14px; padding: 8px 16px; border-radius: 6px; background: #f5f5f5; }
+.main { max-width: 1200px; margin: 0 auto; padding: 24px; }
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px; }
+.stat-card { background: #fff; border-radius: 12px; padding: 20px; display: flex; align-items: center; gap: 16px; }
+.stat-icon { width: 48px; height: 48px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 24px; }
 .stat-icon.orange { background: #fff7e6; }
 .stat-icon.green { background: #e6f7ff; }
 .stat-icon.blue { background: #f0f5ff; }
 .stat-info .num { font-size: 24px; font-weight: 700; }
 .stat-info .label { font-size: 13px; color: #999; margin-top: 2px; }
-
-/* 操作栏 */
-.toolbar {
-  background: #fff;
-  border-radius: 12px;
-  padding: 16px 20px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 20px;
-}
-.toolbar-left { display: flex; align-items: center; gap: 12px; }
-.toolbar-right { display: flex; align-items: center; gap: 12px; }
-.search-box {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: #f5f7fa;
-  padding: 8px 14px;
-  border-radius: 8px;
-  border: 1px solid transparent;
-  transition: all 0.2s;
-}
-.search-box:focus-within {
-  border-color: #e54d00;
-  background: #fff;
-}
-.search-box input {
-  border: none;
-  outline: none;
-  background: transparent;
-  font-size: 14px;
-  width: 200px;
-}
-.add-btn {
-  background: #e54d00;
-  color: #fff;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  transition: all 0.2s;
-}
-.add-btn:hover { background: #d94400; }
-
-/* 商品表格 */
-.table-box {
-  background: #fff;
-  border-radius: 12px;
-  overflow: hidden;
-}
-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-th, td {
-  padding: 14px 16px;
-  text-align: left;
-  border-bottom: 1px solid #f0f0f0;
-}
-th {
-  background: #fafafa;
-  font-size: 13px;
-  font-weight: 600;
-  color: #666;
-}
+.toolbar { background: #fff; border-radius: 12px; padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+.search-box { display: flex; align-items: center; gap: 8px; background: #f5f7fa; padding: 8px 14px; border-radius: 8px; }
+.search-box input { border: none; outline: none; background: transparent; font-size: 14px; width: 200px; }
+.add-btn { background: #e54d00; color: #fff; border: none; padding: 10px 20px; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; }
+.table-box { background: #fff; border-radius: 12px; overflow: hidden; }
+table { width: 100%; border-collapse: collapse; }
+th, td { padding: 14px 16px; text-align: left; border-bottom: 1px solid #f0f0f0; }
+th { background: #fafafa; font-size: 13px; font-weight: 600; color: #666; }
 td { font-size: 14px; }
 tr:hover { background: #fafafa; }
-tr:last-child td { border-bottom: none; }
-.product-cell {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-.product-cell img {
-  width: 50px;
-  height: 50px;
-  border-radius: 8px;
-  background: #f5f5f5;
-  object-fit: cover;
-}
+.product-cell { display: flex; align-items: center; gap: 12px; }
+.product-cell img { width: 50px; height: 50px; border-radius: 8px; object-fit: cover; }
 .product-cell-info .name { font-weight: 500; margin-bottom: 2px; }
 .product-cell-info .desc { font-size: 12px; color: #999; }
 .price { font-weight: 600; color: #e54d00; }
-.sales { color: #666; }
-.actions {
-  display: flex;
-  gap: 8px;
-}
-.actions button {
-  padding: 6px 12px;
-  border-radius: 6px;
-  font-size: 13px;
-  cursor: pointer;
-  border: none;
-  transition: all 0.2s;
-}
-.actions .edit {
-  background: #f0f5ff;
-  color: #2563eb;
-}
-.actions .edit:hover { background: #e0edff; }
-.actions .delete {
-  background: #fff2f0;
-  color: #ff4d4f;
-}
-.actions .delete:hover { background: #ffe8e6; }
-.empty {
-  text-align: center;
-  padding: 60px;
-  color: #999;
-}
-
-/* 弹窗 */
-.modal {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.5);
-  display: none;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-}
+.actions { display: flex; gap: 8px; }
+.actions button { padding: 6px 12px; border-radius: 6px; font-size: 13px; cursor: pointer; border: none; }
+.actions .edit { background: #f0f5ff; color: #2563eb; }
+.actions .delete { background: #fff2f0; color: #ff4d4f; }
+.modal { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 1000; }
 .modal.show { display: flex; }
-.form-box {
-  background: #fff;
-  width: 100%;
-  max-width: 560px;
-  border-radius: 16px;
-  padding: 28px;
-  max-height: 90vh;
-  overflow-y: auto;
-}
-.form-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 24px;
-}
+.form-box { background: #fff; width: 100%; max-width: 560px; border-radius: 16px; padding: 28px; max-height: 90vh; overflow-y: auto; }
+.form-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
 .form-header h2 { font-size: 18px; font-weight: 600; }
-.form-close {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background: #f5f5f5;
-  border: none;
-  cursor: pointer;
-  font-size: 18px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.form-close:hover { background: #e5e5e5; }
-.form-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-}
+.form-close { width: 32px; height: 32px; border-radius: 50%; background: #f5f5f5; border: none; cursor: pointer; font-size: 18px; }
 .form-group { margin-bottom: 16px; }
-.form-group label {
-  display: block;
-  font-size: 13px;
-  color: #666;
-  margin-bottom: 6px;
-  font-weight: 500;
-}
-.form-group input,
-.form-group textarea {
-  width: 100%;
-  padding: 10px 14px;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  font-size: 14px;
-  outline: none;
-  transition: border-color 0.2s;
-}
-.form-group input:focus,
-.form-group textarea:focus {
-  border-color: #e54d00;
-}
+.form-group label { display: block; font-size: 13px; color: #666; margin-bottom: 6px; font-weight: 500; }
+.form-group input, .form-group textarea { width: 100%; padding: 10px 14px; border: 1px solid #e5e7eb; border-radius: 8px; font-size: 14px; outline: none; }
+.form-group input:focus { border-color: #e54d00; }
 .form-group textarea { resize: vertical; height: 80px; }
-.form-btns {
-  display: flex;
-  gap: 12px;
-  margin-top: 24px;
-}
-.form-btns button {
-  flex: 1;
-  padding: 12px;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  border: none;
-  transition: all 0.2s;
-}
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.form-btns { display: flex; gap: 12px; margin-top: 24px; }
+.form-btns button { flex: 1; padding: 12px; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; border: none; }
 .btn-save { background: #e54d00; color: #fff; }
-.btn-save:hover { background: #d94400; }
 .btn-cancel { background: #f5f5f5; color: #666; }
-.btn-cancel:hover { background: #e5e5e5; }
 .btn-delete { background: #fff; color: #ff4d4f; border: 1px solid #ff4d4f; display: none; }
-.btn-delete:hover { background: #fff2f0; }
-
-.toast {
-  position: fixed;
-  top: 24px;
-  left: 50%;
-  transform: translateX(-50%) translateY(-20px);
-  background: #333;
-  color: #fff;
-  padding: 12px 24px;
-  border-radius: 8px;
-  font-size: 14px;
-  z-index: 9999;
-  opacity: 0;
-  pointer-events: none;
-  transition: all 0.3s;
-}
+.toast { position: fixed; top: 24px; left: 50%; transform: translateX(-50%) translateY(-20px); background: #333; color: #fff; padding: 12px 24px; border-radius: 8px; font-size: 14px; z-index: 9999; opacity: 0; pointer-events: none; transition: all 0.3s; }
 .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-
-/* 响应式 */
+.tip { font-size: 12px; color: #999; margin-top: 4px; }
 @media (max-width: 768px) {
   .main { padding: 16px; }
-  .stats { grid-template-columns: repeat(2, 1fr); }
   .form-row { grid-template-columns: 1fr; }
-  .toolbar { flex-direction: column; gap: 12px; align-items: stretch; }
-  .toolbar-left, .toolbar-right { justify-content: center; }
-  table { font-size: 13px; }
-  th, td { padding: 10px 8px; }
-  .product-cell img { width: 40px; height: 40px; }
 }
 </style>
 </head>
@@ -319,101 +73,54 @@ tr:last-child td { border-bottom: none; }
 </div>
 
 <div class="main">
-  <!-- 统计 -->
   <div class="stats">
     <div class="stat-card">
       <div class="stat-icon orange">📦</div>
-      <div class="stat-info">
-        <div class="num" id="totalProducts">0</div>
-        <div class="label">商品总数</div>
-      </div>
+      <div class="stat-info"><div class="num" id="totalProducts">0</div><div class="label">商品总数</div></div>
     </div>
     <div class="stat-card">
       <div class="stat-icon green">💰</div>
-      <div class="stat-info">
-        <div class="num" id="totalSales">0</div>
-        <div class="label">总销量</div>
-      </div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-icon blue">👁</div>
-      <div class="stat-info">
-        <div class="num">-</div>
-        <div class="label">今日访问</div>
-      </div>
+      <div class="stat-info"><div class="num" id="totalSales">0</div><div class="label">总销量</div></div>
     </div>
   </div>
 
-  <!-- 操作栏 -->
   <div class="toolbar">
-    <div class="toolbar-left">
-      <div class="search-box">
-        <span>🔍</span>
-        <input type="text" id="searchInput" placeholder="搜索商品..." oninput="renderTable()">
-      </div>
-    </div>
-    <div class="toolbar-right">
-      <button class="add-btn" onclick="openForm()">+ 添加商品</button>
-    </div>
+    <div class="search-box"><span>🔍</span><input type="text" placeholder="搜索商品..." oninput="renderTable()"></div>
+    <button class="add-btn" onclick="openForm()">+ 添加商品</button>
   </div>
 
-  <!-- 表格 -->
   <div class="table-box">
     <table>
-      <thead>
-        <tr>
-          <th style="width:40%;">商品</th>
-          <th>价格</th>
-          <th>销量</th>
-          <th>操作</th>
-        </tr>
-      </thead>
+      <thead><tr><th style="width:40%;">商品</th><th>价格</th><th>销量</th><th>操作</th></tr></thead>
       <tbody id="tableBody"></tbody>
     </table>
-    <div class="empty" id="empty" style="display:none;">
-      <div style="font-size:48px;margin-bottom:12px;">📦</div>
-      <div>暂无商品，点击上方按钮添加</div>
-    </div>
   </div>
 </div>
 
 <!-- 编辑弹窗 -->
 <div class="modal" id="modal">
   <div class="form-box">
-    <div class="form-header">
-      <h2 id="formTitle">添加商品</h2>
-      <button class="form-close" onclick="closeForm()">×</button>
-    </div>
+    <div class="form-header"><h2 id="formTitle">添加商品</h2><button class="form-close" onclick="closeForm()">×</button></div>
+    <div class="form-group"><label>商品名称</label><input type="text" id="pTitle" placeholder="例：2026考研数学复习全书"></div>
     <div class="form-row">
-      <div class="form-group" style="grid-column:1/-1;">
-        <label>商品名称</label>
-        <input type="text" id="pTitle" placeholder="例：2026考研数学复习全书">
-      </div>
+      <div class="form-group"><label>价格（元）</label><input type="number" id="pPrice" placeholder="29.9" step="0.1"></div>
+      <div class="form-group"><label>销量</label><input type="number" id="pSales" placeholder="0"></div>
     </div>
+    <div class="form-group"><label>图标（emoji）</label><input type="text" id="pImg" placeholder="📐"></div>
     <div class="form-row">
       <div class="form-group">
-        <label>价格（元）</label>
-        <input type="number" id="pPrice" placeholder="29.9" step="0.1">
+        <label>微信收款码图片URL</label>
+        <input type="text" id="pWechatPay" placeholder="微信收款码图片链接">
+        <div class="tip">在微信收款码小程序生成</div>
       </div>
       <div class="form-group">
-        <label>销量</label>
-        <input type="number" id="pSales" placeholder="0">
+        <label>支付宝收款码图片URL</label>
+        <input type="text" id="pAlipay" placeholder="支付宝收款码图片链接">
+        <div class="tip">在支付宝收款码生成</div>
       </div>
     </div>
-    <div class="form-row">
-      <div class="form-group">
-        <label>图标（emoji）</label>
-        <input type="text" id="pImg" placeholder="📐">
-      </div>
-      <div class="form-group">
-        <label>发货图片URL</label>
-        <input type="text" id="pFileUrl" placeholder="购买后发送的图片">
-      </div>
-    </div>
-    <div class="form-group">
-      <label>商品描述</label>
-      <textarea id="pDesc" placeholder="描述商品特点..."></textarea>
-    </div>
+    <div class="form-group"><label>发货图片URL（购买后发送）</label><input type="text" id="pFileUrl" placeholder="购买后发送的资料图片"></div>
+    <div class="form-group"><label>商品描述</label><textarea id="pDesc" placeholder="描述商品特点..."></textarea></div>
     <div class="form-btns">
       <button class="btn-delete" id="delBtn" onclick="deleteProduct()">删除</button>
       <button class="btn-cancel" onclick="closeForm()">取消</button>
@@ -426,28 +133,17 @@ tr:last-child td { border-bottom: none; }
 
 <script>
 const defaults = [
-  { id: 1, title: '2026考研数学复习全书', price: 29.9, sales: 1523, img: '📐', desc: '包含高数、线代、概率论全部内容，配套视频讲解', fileUrl: '' },
-  { id: 2, title: '考研英语词汇5500', price: 9.9, sales: 2341, img: '📖', desc: '考研英语大纲词汇，附带真题例句和记忆技巧', fileUrl: '' },
-  { id: 3, title: '考研政治核心考点', price: 19.9, sales: 1892, img: '📕', desc: '马原、毛概、史纲、思修核心知识点总结', fileUrl: '' },
-  { id: 4, title: '考研数学历年真题', price: 39.9, sales: 892, img: '📝', desc: '近20年考研数学真题及详细解析', fileUrl: '' },
-  { id: 5, title: '考研英语真题精解', price: 35.9, sales: 1023, img: '📋', desc: '近15年英语真题逐句精解', fileUrl: '' },
-  { id: 6, title: '计算机408专业课', price: 49.9, sales: 567, img: '💻', desc: '数据结构、操作系统、计网、组成原理全套', fileUrl: '' },
+  { id: 1, title: '2026考研数学复习全书', price: 29.9, sales: 1523, img: '📐', desc: '包含高数、线代、概率论全部内容', wechatPay: '', alipay: '', fileUrl: '' },
+  { id: 2, title: '考研英语词汇5500', price: 9.9, sales: 2341, img: '📖', desc: '考研英语大纲词汇', wechatPay: '', alipay: '', fileUrl: '' },
 ];
 
 let products = JSON.parse(localStorage.getItem('products')) || defaults;
-let editingId = null;
 
-// 初始化
 function init() {
-  // 统一数据格式
   products = products.map(p => ({
-    id: p.id,
-    title: p.title,
-    price: p.price,
-    sales: p.sales || 0,
-    img: p.img || '📄',
-    desc: p.desc || '',
-    fileUrl: p.fileUrl || ''
+    id: p.id, title: p.title, price: p.price, sales: p.sales || 0,
+    img: p.img || '📄', desc: p.desc || '', wechatPay: p.wechatPay || '',
+    alipay: p.alipay || '', fileUrl: p.fileUrl || ''
   }));
   localStorage.setItem('products', JSON.stringify(products));
   renderTable();
@@ -460,133 +156,80 @@ function updateStats() {
 }
 
 function renderTable() {
-  const search = document.getElementById('searchInput').value.toLowerCase();
-  const filtered = products.filter(p => 
-    p.title.toLowerCase().includes(search) || 
-    p.desc.toLowerCase().includes(search)
-  );
-  
+  const search = document.querySelector('.search-box input').value.toLowerCase();
+  const filtered = products.filter(p => p.title.toLowerCase().includes(search) || p.desc.toLowerCase().includes(search));
   const tbody = document.getElementById('tableBody');
-  const empty = document.getElementById('empty');
-  
-  if (filtered.length === 0) {
-    tbody.innerHTML = '';
-    empty.style.display = 'block';
-    return;
-  }
-  
-  empty.style.display = 'none';
   tbody.innerHTML = filtered.map(p => `
     <tr>
-      <td>
-        <div class="product-cell">
-          <span style="font-size:32px;">${p.img}</span>
-          <div class="product-cell-info">
-            <div class="name">${p.title}</div>
-            <div class="desc">${p.desc.substring(0, 30)}${p.desc.length > 30 ? '...' : ''}</div>
-          </div>
-        </div>
-      </td>
+      <td><div class="product-cell"><span style="font-size:32px;">${p.img}</span><div class="product-cell-info"><div class="name">${p.title}</div><div class="desc">${p.desc.substring(0,20)}...</div></div></div></td>
       <td><span class="price">¥${p.price}</span></td>
-      <td><span class="sales">${p.sales}</span></td>
-      <td>
-        <div class="actions">
-          <button class="edit" onclick="openForm(${p.id})">编辑</button>
-          <button class="delete" onclick="confirmDelete(${p.id})">删除</button>
-        </div>
-      </td>
+      <td>${p.sales}</td>
+      <td><div class="actions"><button class="edit" onclick="openForm(${p.id})">编辑</button><button class="delete" onclick="confirmDelete(${p.id})">删除</button></div></td>
     </tr>
   `).join('');
 }
 
 function openForm(id) {
   editingId = id;
-  const modal = document.getElementById('modal');
-  const title = document.getElementById('formTitle');
-  const delBtn = document.getElementById('delBtn');
-  
   if (id) {
     const p = products.find(x => x.id === id);
     if (!p) return;
-    title.textContent = '编辑商品';
+    document.getElementById('formTitle').textContent = '编辑商品';
     document.getElementById('pTitle').value = p.title;
     document.getElementById('pPrice').value = p.price;
     document.getElementById('pSales').value = p.sales;
     document.getElementById('pImg').value = p.img;
-    document.getElementById('pFileUrl').value = p.fileUrl;
+    document.getElementById('pWechatPay').value = p.wechatPay || '';
+    document.getElementById('pAlipay').value = p.alipay || '';
+    document.getElementById('pFileUrl').value = p.fileUrl || '';
     document.getElementById('pDesc').value = p.desc;
-    delBtn.style.display = 'block';
+    document.getElementById('delBtn').style.display = 'block';
   } else {
-    title.textContent = '添加商品';
+    document.getElementById('formTitle').textContent = '添加商品';
     document.getElementById('pTitle').value = '';
     document.getElementById('pPrice').value = '';
     document.getElementById('pSales').value = '0';
     document.getElementById('pImg').value = '📄';
+    document.getElementById('pWechatPay').value = '';
+    document.getElementById('pAlipay').value = '';
     document.getElementById('pFileUrl').value = '';
     document.getElementById('pDesc').value = '';
-    delBtn.style.display = 'none';
+    document.getElementById('delBtn').style.display = 'none';
   }
-  modal.classList.add('show');
+  document.getElementById('modal').classList.add('show');
 }
 
-function closeForm() {
-  document.getElementById('modal').classList.remove('show');
-  editingId = null;
-}
+function closeForm() { document.getElementById('modal').classList.remove('show'); editingId = null; }
 
 function saveProduct() {
   const title = document.getElementById('pTitle').value.trim();
   const price = parseFloat(document.getElementById('pPrice').value);
   const sales = parseInt(document.getElementById('pSales').value) || 0;
   const img = document.getElementById('pImg').value.trim() || '📄';
+  const wechatPay = document.getElementById('pWechatPay').value.trim();
+  const alipay = document.getElementById('pAlipay').value.trim();
   const fileUrl = document.getElementById('pFileUrl').value.trim();
   const desc = document.getElementById('pDesc').value.trim();
   
-  if (!title || isNaN(price)) {
-    showToast('请填写名称和价格');
-    return;
-  }
+  if (!title || isNaN(price)) { showToast('请填写名称和价格'); return; }
   
   if (editingId) {
     const p = products.find(x => x.id === editingId);
-    if (p) {
-      p.title = title;
-      p.price = price;
-      p.sales = sales;
-      p.img = img;
-      p.fileUrl = fileUrl;
-      p.desc = desc;
-    }
+    if (p) Object.assign(p, { title, price, sales, img, wechatPay, alipay, fileUrl, desc });
     showToast('已更新');
   } else {
-    products.push({ id: Date.now(), title, price, sales, img, fileUrl, desc });
+    products.push({ id: Date.now(), title, price, sales, img, wechatPay, alipay, fileUrl, desc });
     showToast('已添加');
   }
-  
   localStorage.setItem('products', JSON.stringify(products));
   closeForm();
   renderTable();
   updateStats();
 }
 
-function confirmDelete(id) {
-  if (!confirm('确定删除这个商品？')) return;
-  deleteProductById(id);
-}
-
-function deleteProductById(id) {
-  products = products.filter(x => x.id !== id);
-  localStorage.setItem('products', JSON.stringify(products));
-  renderTable();
-  updateStats();
-  showToast('已删除');
-}
-
-function deleteProduct() {
-  if (!editingId) return;
-  deleteProductById(editingId);
-  closeForm();
-}
+function confirmDelete(id) { if (!confirm('确定删除？')) return; deleteProductById(id); }
+function deleteProductById(id) { products = products.filter(x => x.id !== id); localStorage.setItem('products', JSON.stringify(products)); renderTable(); updateStats(); showToast('已删除'); }
+function deleteProduct() { if (editingId) deleteProductById(editingId); closeForm(); }
 
 function showToast(msg) {
   const t = document.getElementById('toast');
@@ -595,10 +238,7 @@ function showToast(msg) {
   setTimeout(() => t.classList.remove('show'), 2000);
 }
 
-document.getElementById('modal').addEventListener('click', e => {
-  if (e.target === document.getElementById('modal')) closeForm();
-});
-
+document.getElementById('modal').addEventListener('click', e => { if (e.target === document.getElementById('modal')) closeForm(); });
 init();
 </script>
 </body>
