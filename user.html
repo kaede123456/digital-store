@@ -208,7 +208,25 @@ function openDetail(id) {
 }
 
 function closeDetail() { document.getElementById('detailPage').classList.remove('show'); }
-function openPay() { document.getElementById('payModal').classList.add('show'); }
+function openPay() { 
+  document.getElementById('payModal').classList.add('show'); 
+  
+  // 15秒倒计时
+  let countdown = 15;
+  const btn = document.getElementById('doneBtn');
+  btn.disabled = true;
+  btn.textContent = '请等待 ' + countdown + ' 秒';
+  window.payTimer = setInterval(() => {
+    countdown--;
+    if (countdown <= 0) {
+      clearInterval(window.payTimer);
+      btn.disabled = false;
+      btn.textContent = '我已付款';
+    } else {
+      btn.textContent = '请等待 ' + countdown + ' 秒';
+    }
+  }, 1000);
+}
 
 function selectPay(el, type) {
   document.querySelectorAll('.pay-method').forEach(m => { m.classList.remove('active'); m.querySelector('.pay-check').textContent = ''; });
@@ -229,22 +247,12 @@ function goToPayPage() {
   document.getElementById('qrTitle').textContent = selectedPay === 'wechat' ? '请使用微信扫码支付' : '请使用支付宝扫码支付';
   document.getElementById('qrAmount').textContent = '¥' + currentProduct.price;
   document.getElementById('payPage').classList.add('show');
-  
-  // 15秒倒计时
-  let countdown = 15;
-  const btn = document.getElementById('doneBtn');
-  btn.disabled = true;
-  btn.textContent = '请等待 ' + countdown + ' 秒';
-  const timer = setInterval(() => {
-    countdown--;
-    if (countdown <= 0) {
-      clearInterval(timer);
-      btn.disabled = false;
-      btn.textContent = '我已付款';
-    } else {
-      btn.textContent = '请等待 ' + countdown + ' 秒';
-    }
-  }, 1000);
+}
+
+function closePayPage() { 
+  document.getElementById('payPage').classList.remove('show'); 
+  // 关闭付款页时清除倒计时
+  if (window.payTimer) clearInterval(window.payTimer);
 }
 
 function closePayPage() { document.getElementById('payPage').classList.remove('show'); }
