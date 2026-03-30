@@ -139,19 +139,24 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif
     <div class="pay-qr-title" id="qrTitle">请使用微信扫码支付</div>
     <div class="pay-qr-img"><img id="qrImg" src="" alt="收款码"></div>
     <div class="pay-qr-amount" id="qrAmount">¥0</div>
-    <div class="pay-qr-tip">付款完成后点击下方按钮</div>
-    <button class="done-btn" id="doneBtn" onclick="confirmPaid()">我已付款</button>
+    <div class="pay-qr-tip">截图 → 打开微信扫一扫 → 从相册选择</div>
+    <div style="background:#fff8e6;border-radius:8px;padding:12px;margin-top:16px;text-align:center;">
+      <div style="font-size:13px;color:#fa8c16;">⚠️ 付款后请加客服微信发送付款截图</div>
+    </div>
   </div>
 </div>
 
-<!-- 成功弹窗 -->
+<!-- 提交审核弹窗 -->
 <div class="modal" id="successModal">
   <div class="success-box">
-    <div class="success-icon">✓</div>
-    <div class="success-title">购买成功</div>
-    <div class="success-desc">点击下方按钮获取资料</div>
-    <div class="success-img" id="successImg">📄</div>
-    <button class="success-btn" onclick="downloadFile()">📥 保存图片</button>
+    <div class="success-icon" style="background:#1890ff;">⏳</div>
+    <div class="success-title">付款已提交</div>
+    <div class="success-desc">请加客服微信审核，审核后发送资料</div>
+    <div style="background:#f5f5f5;border-radius:8px;padding:16px;margin-bottom:16px;">
+      <div style="font-size:13px;color:#999;margin-bottom:8px;">客服微信</div>
+      <div style="font-size:18px;font-weight:600;" id="kfWechat">暂未设置</div>
+    </div>
+    <button class="success-btn" onclick="copyWechat()">📋 复制客服微信</button>
     <button class="success-close" onclick="closeSuccess()">关闭</button>
   </div>
 </div>
@@ -210,18 +215,6 @@ function openDetail(id) {
 function closeDetail() { document.getElementById('detailPage').classList.remove('show'); }
 function openPay() { 
   document.getElementById('payModal').classList.add('show'); 
-  
-  // 15秒后才能点
-  const btn = document.getElementById('doneBtn');
-  btn.disabled = true;
-  let countdown = 15;
-  window.payTimer = setInterval(() => {
-    countdown--;
-    if (countdown <= 0) {
-      clearInterval(window.payTimer);
-      btn.disabled = false;
-    }
-  }, 1000);
 }
 
 function selectPay(el, type) {
@@ -274,6 +267,19 @@ function downloadFile() {
   }
 }
 function closeSuccess() { document.getElementById('successModal').classList.remove('show'); closeDetail(); }
+
+function copyWechat() {
+  const wechat = localStorage.getItem('kfWechat') || '';
+  if (!wechat) {
+    showToast('商家未设置客服微信');
+    return;
+  }
+  navigator.clipboard.writeText(wechat).then(() => {
+    showToast('已复制');
+  }).catch(() => {
+    showToast('复制失败，请手动复制');
+  });
+}
 
 function showToast(msg) {
   const t = document.getElementById('toast');
