@@ -6,508 +6,140 @@
 <title>资料库</title>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-body {
-  font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif;
-  background: #f5f5f5;
-  color: #1a1a1a;
-  min-height: 100vh;
-  padding-bottom: 70px;
-  -webkit-font-smoothing: antialiased;
-}
+body { font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif; background: #f5f5f5; color: #1a1a1a; min-height: 100vh; padding-bottom: 70px; -webkit-font-smoothing: antialiased; }
 .page { display: none; }
 .page.active { display: block; }
-
-/* 头部 */
-.header {
-  background: #fff;
-  padding: 16px 20px;
-  border-bottom: 1px solid #eee;
-  position: sticky;
-  top: 0;
-  z-index: 100;
-}
-.header h1 {
-  font-size: 20px;
-  font-weight: 600;
-  color: #1a1a1a;
-}
-.header p {
-  font-size: 13px;
-  color: #999;
-  margin-top: 4px;
-}
-
-/* 商品列表 */
-.products {
-  padding: 16px;
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 12px;
-}
-.product {
-  background: #fff;
-  border-radius: 12px;
-  overflow: hidden;
-  cursor: pointer;
-  transition: transform 0.2s;
-}
+.header { background: #fff; padding: 16px 20px; border-bottom: 1px solid #eee; position: sticky; top: 0; z-index: 100; }
+.header h1 { font-size: 20px; font-weight: 600; }
+.header p { font-size: 13px; color: #999; margin-top: 4px; }
+.products { padding: 16px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+.product { background: #fff; border-radius: 12px; overflow: hidden; cursor: pointer; transition: transform 0.2s; }
 .product:active { transform: scale(0.98); }
-.product-img {
-  width: 100%;
-  aspect-ratio: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 48px;
-  background: #fafafa;
-}
-.product-info {
-  padding: 12px;
-}
-.product-title {
-  font-size: 14px;
-  font-weight: 500;
-  color: #1a1a1a;
-  line-height: 1.4;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  margin-bottom: 8px;
-  min-height: 40px;
-}
-.product-bottom {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-.product-price {
-  font-size: 18px;
-  font-weight: 600;
-  color: #e54d00;
-}
-.product-sales {
-  font-size: 11px;
-  color: #bbb;
-}
-
-/* 详情页 */
-.detail {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: #fff;
-  z-index: 200;
-  display: none;
-  flex-direction: column;
-}
+.product-img { width: 100%; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-size: 48px; background: #fafafa; }
+.product-info { padding: 12px; }
+.product-title { font-size: 14px; font-weight: 500; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin-bottom: 8px; min-height: 40px; }
+.product-bottom { display: flex; align-items: center; justify-content: space-between; }
+.product-price { font-size: 18px; font-weight: 600; color: #e54d00; }
+.product-sales { font-size: 11px; color: #bbb; }
+.detail { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: #fff; z-index: 200; display: none; flex-direction: column; }
 .detail.show { display: flex; }
-.detail-header {
-  padding: 16px 20px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  border-bottom: 1px solid #eee;
-}
-.back-btn {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background: #f5f5f5;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 16px;
-  cursor: pointer;
-}
-.detail-title-bar {
-  flex: 1;
-  font-size: 16px;
-  font-weight: 500;
-}
-.detail-content {
-  flex: 1;
-  overflow-y: auto;
-}
-.detail-img {
-  width: 100%;
-  aspect-ratio: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 80px;
-  background: #fafafa;
-}
-.detail-body {
-  padding: 20px;
-}
-.detail-price {
-  font-size: 28px;
-  font-weight: 600;
-  color: #e54d00;
-  margin-bottom: 12px;
-}
-.detail-desc {
-  font-size: 14px;
-  color: #666;
-  line-height: 1.6;
-}
-.detail-tags {
-  margin-top: 16px;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-.tag {
-  font-size: 12px;
-  padding: 6px 12px;
-  background: #f5f5f5;
-  border-radius: 4px;
-  color: #666;
-}
-.detail-footer {
-  padding: 12px 20px;
-  display: flex;
-  gap: 12px;
-  border-top: 1px solid #eee;
-  background: #fff;
-}
-.buy-btn {
-  flex: 1;
-  background: #e54d00;
-  color: #fff;
-  border: none;
-  padding: 14px;
-  border-radius: 8px;
-  font-size: 16px;
-  font-weight: 500;
-  cursor: pointer;
-}
-
-/* 支付弹窗 */
-.modal {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.5);
-  display: none;
-  align-items: flex-end;
-  z-index: 300;
-}
+.detail-header { padding: 16px 20px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid #eee; }
+.back-btn { width: 32px; height: 32px; border-radius: 50%; background: #f5f5f5; display: flex; align-items: center; justify-content: center; font-size: 16px; cursor: pointer; }
+.detail-title-bar { flex: 1; font-size: 16px; font-weight: 500; }
+.detail-content { flex: 1; overflow-y: auto; }
+.detail-img { width: 100%; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-size: 80px; background: #fafafa; }
+.detail-body { padding: 20px; }
+.detail-price { font-size: 28px; font-weight: 600; color: #e54d00; margin-bottom: 12px; }
+.detail-desc { font-size: 14px; color: #666; line-height: 1.6; }
+.detail-footer { padding: 12px 20px; display: flex; gap: 12px; border-top: 1px solid #eee; background: #fff; }
+.buy-btn { flex: 1; background: #e54d00; color: #fff; border: none; padding: 14px; border-radius: 8px; font-size: 16px; font-weight: 500; cursor: pointer; }
+.modal { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; align-items: flex-end; z-index: 300; }
 .modal.show { display: flex; }
-.pay-box {
-  background: #fff;
-  width: 100%;
-  border-radius: 16px 16px 0 0;
-  padding: 24px 20px;
-}
-.pay-title {
-  text-align: center;
-  font-size: 16px;
-  font-weight: 500;
-  margin-bottom: 20px;
-}
-.pay-amount {
-  text-align: center;
-  padding: 20px;
-  background: #f9f9f9;
-  border-radius: 12px;
-  margin-bottom: 20px;
-}
-.pay-amount .num {
-  font-size: 36px;
-  font-weight: 600;
-  color: #e54d00;
-}
-.pay-method {
-  display: flex;
-  align-items: center;
-  padding: 16px;
-  border: 1px solid #eee;
-  border-radius: 10px;
-  margin-bottom: 12px;
-  cursor: pointer;
-}
-.pay-method.active {
-  border-color: #e54d00;
-  background: #fff8f5;
-}
-.pay-icon {
-  width: 36px;
-  height: 36px;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 18px;
-  margin-right: 12px;
-}
-.pay-name {
-  flex: 1;
-  font-size: 15px;
-}
-.pay-check {
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  border: 2px solid #ddd;
-}
-.pay-method.active .pay-check {
-  background: #e54d00;
-  border-color: #e54d00;
-  color: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 12px;
-}
-.confirm-pay {
-  width: 100%;
-  background: #e54d00;
-  color: #fff;
-  border: none;
-  padding: 16px;
-  border-radius: 10px;
-  font-size: 16px;
-  font-weight: 500;
-  margin-top: 12px;
-  cursor: pointer;
-}
-
-/* 成功弹窗 */
-.success-box {
-  background: #fff;
-  width: 100%;
-  max-width: 340px;
-  border-radius: 16px;
-  padding: 32px 24px;
-  text-align: center;
-}
-.success-icon {
-  width: 60px;
-  height: 60px;
-  background: #52c41a;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 28px;
-  color: #fff;
-  margin: 0 auto 16px;
-}
-.success-title {
-  font-size: 18px;
-  font-weight: 600;
-  margin-bottom: 8px;
-}
-.success-desc {
-  font-size: 14px;
-  color: #999;
-  margin-bottom: 20px;
-}
-.success-img {
-  width: 100%;
-  aspect-ratio: 16/9;
-  background: #f5f5f5;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 48px;
-  margin-bottom: 20px;
-}
-.success-btn {
-  width: 100%;
-  background: #e54d00;
-  color: #fff;
-  border: none;
-  padding: 14px;
-  border-radius: 8px;
-  font-size: 15px;
-  font-weight: 500;
-  cursor: pointer;
-}
-.success-close {
-  width: 100%;
-  background: transparent;
-  color: #999;
-  border: 1px solid #ddd;
-  padding: 14px;
-  border-radius: 8px;
-  font-size: 15px;
-  margin-top: 10px;
-  cursor: pointer;
-}
-
-/* 底部导航 */
-.bottom-nav {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 60px;
-  background: #fff;
-  display: flex;
-  border-top: 1px solid #eee;
-  z-index: 100;
-}
-.nav-item {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  color: #999;
-  font-size: 11px;
-  cursor: pointer;
-}
+.pay-box { background: #fff; width: 100%; border-radius: 16px 16px 0 0; padding: 24px 20px; }
+.pay-title { text-align: center; font-size: 16px; font-weight: 500; margin-bottom: 20px; }
+.pay-amount { text-align: center; padding: 20px; background: #f9f9f9; border-radius: 12px; margin-bottom: 20px; }
+.pay-amount .num { font-size: 36px; font-weight: 600; color: #e54d00; }
+.pay-method { display: flex; align-items: center; padding: 16px; border: 1px solid #eee; border-radius: 10px; margin-bottom: 12px; cursor: pointer; }
+.pay-method.active { border-color: #e54d00; background: #fff8f5; }
+.pay-icon { width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; margin-right: 12px; }
+.pay-name { flex: 1; font-size: 15px; }
+.pay-check { width: 20px; height: 20px; border-radius: 50%; border: 2px solid #ddd; }
+.pay-method.active .pay-check { background: #e54d00; border-color: #e54d00; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 12px; }
+.confirm-pay { width: 100%; background: #e54d00; color: #fff; border: none; padding: 16px; border-radius: 10px; font-size: 16px; font-weight: 500; margin-top: 12px; cursor: pointer; }
+/* 付款页 */
+.pay-page { position: fixed; inset: 0; background: #fff; z-index: 400; display: none; flex-direction: column; }
+.pay-page.show { display: flex; }
+.pay-page-header { padding: 16px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid #eee; }
+.pay-page-title { font-size: 16px; font-weight: 500; }
+.pay-page-content { flex: 1; overflow-y: auto; padding: 20px; text-align: center; }
+.pay-qr-title { font-size: 16px; font-weight: 500; margin-bottom: 16px; }
+.pay-qr-img { width: 220px; height: 220px; margin: 0 auto 16px; border-radius: 12px; background: #f5f5f5; display: flex; align-items: center; justify-content: center; }
+.pay-qr-img img { max-width: 100%; max-height: 100%; border-radius: 12px; }
+.pay-qr-tip { font-size: 13px; color: #999; margin-bottom: 20px; }
+.pay-qr-amount { font-size: 28px; font-weight: 600; color: #e54d00; margin-bottom: 20px; }
+.done-btn { width: 100%; background: #52c41a; color: #fff; border: none; padding: 14px; border-radius: 8px; font-size: 15px; font-weight: 500; cursor: pointer; margin-top: 20px; }
+/* 成功 */
+.success-box { background: #fff; width: 100%; max-width: 340px; border-radius: 16px; padding: 32px 24px; text-align: center; }
+.success-icon { width: 60px; height: 60px; background: #52c41a; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; color: #fff; margin: 0 auto 16px; }
+.success-title { font-size: 18px; font-weight: 600; margin-bottom: 8px; }
+.success-desc { font-size: 14px; color: #999; margin-bottom: 20px; }
+.success-img { width: 100%; aspect-ratio: 16/9; background: #f5f5f5; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 48px; margin-bottom: 20px; }
+.success-btn { width: 100%; background: #e54d00; color: #fff; border: none; padding: 14px; border-radius: 8px; font-size: 15px; font-weight: 500; cursor: pointer; }
+.success-close { width: 100%; background: transparent; color: #999; border: 1px solid #ddd; padding: 14px; border-radius: 8px; font-size: 15px; margin-top: 10px; cursor: pointer; }
+.bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; height: 60px; background: #fff; display: flex; border-top: 1px solid #eee; z-index: 100; }
+.nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: #999; font-size: 11px; cursor: pointer; }
 .nav-item.active { color: #e54d00; }
-.nav-icon {
-  font-size: 22px;
-}
-
-/* Toast */
-.toast {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: rgba(0,0,0,0.7);
-  color: #fff;
-  padding: 12px 24px;
-  border-radius: 8px;
-  font-size: 14px;
-  z-index: 9999;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.3s;
-}
+.nav-icon { font-size: 22px; }
+.toast { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.7); color: #fff; padding: 12px 24px; border-radius: 8px; font-size: 14px; z-index: 9999; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
 .toast.show { opacity: 1; }
-
-/* 个人中心 */
-.profile-box {
-  padding: 40px 20px 20px;
-  text-align: center;
-  background: #fff;
-  margin: -16px -16px 16px;
-}
-.profile-avatar {
-  width: 70px;
-  height: 70px;
-  background: #f5f5f5;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 30px;
-  margin: 0 auto 12px;
-}
-.profile-name {
-  font-size: 18px;
-  font-weight: 600;
-}
-.menu-item {
-  display: flex;
-  align-items: center;
-  padding: 16px 0;
-  border-bottom: 1px solid #f5f5f5;
-  cursor: pointer;
-}
-.menu-item-icon {
-  font-size: 20px;
-  margin-right: 12px;
-}
-.menu-item-text {
-  flex: 1;
-  font-size: 15px;
-}
-.menu-item-arrow {
-  color: #ccc;
-}
+.profile-box { padding: 40px 20px 20px; text-align: center; background: #fff; margin: -16px -16px 16px; }
+.profile-avatar { width: 70px; height: 70px; background: #f5f5f5; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 30px; margin: 0 auto 12px; }
+.profile-name { font-size: 18px; font-weight: 600; }
+.menu-item { display: flex; align-items: center; padding: 16px 0; border-bottom: 1px solid #f5f5f5; cursor: pointer; }
+.menu-item-icon { font-size: 20px; margin-right: 12px; }
+.menu-item-text { flex: 1; font-size: 15px; }
+.menu-item-arrow { color: #ccc; }
 </style>
 </head>
 <body>
 
-<!-- 首页 -->
 <div class="page active" id="homePage">
-  <div class="header">
-    <h1>📚 资料库</h1>
-    <p>精选考研资料</p>
-  </div>
+  <div class="header"><h1>📚 资料库</h1><p>精选考研资料</p></div>
   <div class="products" id="productsGrid"></div>
 </div>
 
-<!-- 个人中心 -->
 <div class="page" id="profilePage">
-  <div class="header">
-    <h1>👤 我的</h1>
-  </div>
-  <div class="profile-box">
-    <div class="profile-avatar">👤</div>
-    <div class="profile-name">用户</div>
-  </div>
+  <div class="header"><h1>👤 我的</h1></div>
+  <div class="profile-box"><div class="profile-avatar">👤</div><div class="profile-name">用户</div></div>
   <div style="background:#fff;margin:0 16px;border-radius:12px;padding:0 16px;">
-    <div class="menu-item">
-      <span class="menu-item-icon">📋</span>
-      <span class="menu-item-text">我的订单</span>
-      <span class="menu-item-arrow">›</span>
-    </div>
-    <div class="menu-item">
-      <span class="menu-item-icon">⭐</span>
-      <span class="menu-item-text">我的收藏</span>
-      <span class="menu-item-arrow">›</span>
-    </div>
-    <div class="menu-item" style="border:none;">
-      <span class="menu-item-icon">⚙️</span>
-      <span class="menu-item-text">设置</span>
-      <span class="menu-item-arrow">›</span>
-    </div>
+    <div class="menu-item"><span class="menu-item-icon">📋</span><span class="menu-item-text">我的订单</span><span class="menu-item-arrow">›</span></div>
+    <div class="menu-item"><span class="menu-item-icon">⭐</span><span class="menu-item-text">我的收藏</span><span class="menu-item-arrow">›</span></div>
+    <div class="menu-item" style="border:none;"><span class="menu-item-icon">⚙️</span><span class="menu-item-text">设置</span><span class="menu-item-arrow">›</span></div>
   </div>
 </div>
 
 <!-- 商品详情 -->
 <div class="detail" id="detailPage">
-  <div class="detail-header">
-    <div class="back-btn" onclick="closeDetail()">‹</div>
-    <div class="detail-title-bar">商品详情</div>
-  </div>
+  <div class="detail-header"><div class="back-btn" onclick="closeDetail()">‹</div><div class="detail-title-bar">商品详情</div></div>
   <div class="detail-content">
     <div class="detail-img" id="detailImg">📄</div>
     <div class="detail-body">
       <div class="detail-price" id="detailPrice">¥0</div>
       <div class="detail-desc" id="detailDesc">商品描述</div>
-      <div class="detail-tags">
-        <span class="tag">✓ 高清PDF</span>
-        <span class="tag">✓ 永久有效</span>
-        <span class="tag">✓ 即时发货</span>
-      </div>
     </div>
   </div>
-  <div class="detail-footer">
-    <button class="buy-btn" onclick="openPay()">立即购买</button>
-  </div>
+  <div class="detail-footer"><button class="buy-btn" onclick="openPay()">立即购买</button></div>
 </div>
 
-<!-- 支付弹窗 -->
+<!-- 支付方式选择 -->
 <div class="modal" id="payModal">
   <div class="pay-box">
     <div class="pay-title">选择支付方式</div>
-    <div class="pay-amount">
-      <div class="num" id="payPrice">¥0</div>
-    </div>
+    <div class="pay-amount"><div class="num" id="payPrice">¥0</div></div>
     <div class="pay-method active" onclick="selectPay(this, 'wechat')">
-      <div class="pay-icon" style="background:#07c160;color:#fff;">💳</div>
-      <span class="pay-name">微信支付</span>
+      <div class="pay-icon" style="background:#07c160;color:#fff;">💚</div><span class="pay-name">微信支付</span>
       <div class="pay-check">✓</div>
     </div>
     <div class="pay-method" onclick="selectPay(this, 'alipay')">
-      <div class="pay-icon" style="background:#1677ff;color:#fff;">💳</div>
-      <span class="pay-name">支付宝</span>
+      <div class="pay-icon" style="background:#1677ff;color:#fff;">💙</div><span class="pay-name">支付宝</span>
       <div class="pay-check"></div>
     </div>
-    <button class="confirm-pay" onclick="confirmPay()">确认支付</button>
+    <button class="confirm-pay" onclick="goToPayPage()">去付款</button>
+  </div>
+</div>
+
+<!-- 付款页 -->
+<div class="pay-page" id="payPage">
+  <div class="pay-page-header">
+    <div class="back-btn" onclick="closePayPage()">‹</div>
+    <div class="pay-page-title">扫码付款</div>
+  </div>
+  <div class="pay-page-content">
+    <div class="pay-qr-title" id="qrTitle">请使用微信扫码支付</div>
+    <div class="pay-qr-img"><img id="qrImg" src="" alt="收款码"></div>
+    <div class="pay-qr-amount" id="qrAmount">¥0</div>
+    <div class="pay-qr-tip">付款完成后点击下方按钮</div>
+    <button class="done-btn" onclick="confirmPaid()">我已付款</button>
   </div>
 </div>
 
@@ -523,16 +155,9 @@ body {
   </div>
 </div>
 
-<!-- 底部导航 -->
 <div class="bottom-nav">
-  <div class="nav-item active" onclick="switchPage('home')">
-    <span class="nav-icon">🏠</span>
-    <span>首页</span>
-  </div>
-  <div class="nav-item" onclick="switchPage('profile')">
-    <span class="nav-icon">👤</span>
-    <span>我的</span>
-  </div>
+  <div class="nav-item active" onclick="switchPage('home')"><span class="nav-icon">🏠</span><span>首页</span></div>
+  <div class="nav-item" onclick="switchPage('profile')"><span class="nav-icon">👤</span><span>我的</span></div>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -553,10 +178,7 @@ function renderProducts() {
       <div class="product-img">${p.img}</div>
       <div class="product-info">
         <div class="product-title">${p.title}</div>
-        <div class="product-bottom">
-          <span class="product-price">¥${p.price}</span>
-          <span class="product-sales">${p.sales}人购</span>
-        </div>
+        <div class="product-bottom"><span class="product-price">¥${p.price}</span><span class="product-sales">${p.sales}人购</span></div>
       </div>
     </div>
   `).join('');
@@ -588,22 +210,35 @@ function closeDetail() { document.getElementById('detailPage').classList.remove(
 function openPay() { document.getElementById('payModal').classList.add('show'); }
 
 function selectPay(el, type) {
-  document.querySelectorAll('.pay-method').forEach(m => {
-    m.classList.remove('active');
-    m.querySelector('.pay-check').textContent = '';
-  });
+  document.querySelectorAll('.pay-method').forEach(m => { m.classList.remove('active'); m.querySelector('.pay-check').textContent = ''; });
   el.classList.add('active');
   el.querySelector('.pay-check').textContent = '✓';
   selectedPay = type;
 }
 
-function confirmPay() {
+function goToPayPage() {
+  if (!currentProduct) return;
+  const qrUrl = selectedPay === 'wechat' ? currentProduct.wechatPay : currentProduct.alipay;
+  if (!qrUrl) {
+    showToast('商家暂未设置该支付方式');
+    return;
+  }
   document.getElementById('payModal').classList.remove('show');
-  showToast('支付成功');
+  document.getElementById('qrImg').src = qrUrl;
+  document.getElementById('qrTitle').textContent = selectedPay === 'wechat' ? '请使用微信扫码支付' : '请使用支付宝扫码支付';
+  document.getElementById('qrAmount').textContent = '¥' + currentProduct.price;
+  document.getElementById('payPage').classList.add('show');
+}
+
+function closePayPage() { document.getElementById('payPage').classList.remove('show'); }
+
+function confirmPaid() {
+  showToast('提交成功');
   if (currentProduct) {
     currentProduct.sales = (currentProduct.sales || 0) + 1;
     localStorage.setItem('products', JSON.stringify(products));
   }
+  closePayPage();
   setTimeout(() => {
     document.getElementById('successImg').textContent = currentProduct.img;
     document.getElementById('successModal').classList.add('show');
@@ -620,12 +255,7 @@ function showToast(msg) {
   setTimeout(() => t.classList.remove('show'), 2000);
 }
 
-document.getElementById('payModal').addEventListener('click', e => {
-  if (e.target === document.getElementById('payModal')) document.getElementById('payModal').classList.remove('show');
-});
-document.getElementById('successModal').addEventListener('click', e => {
-  if (e.target === document.getElementById('successModal')) document.getElementById('successModal').classList.remove('show');
-});
+document.getElementById('payModal').addEventListener('click', e => { if (e.target === document.getElementById('payModal')) document.getElementById('payModal').classList.remove('show'); });
 
 renderProducts();
 </script>
