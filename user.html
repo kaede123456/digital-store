@@ -151,7 +151,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif
     <div class="success-title">购买成功</div>
     <div class="success-desc">点击下方按钮获取资料</div>
     <div class="success-img" id="successImg">📄</div>
-    <button class="success-btn" onclick="downloadFile()">📥 下载资料</button>
+    <button class="success-btn" onclick="downloadFile()">📥 保存图片</button>
     <button class="success-close" onclick="closeSuccess()">关闭</button>
   </div>
 </div>
@@ -266,7 +266,13 @@ function confirmPaid() {
   }, 500);
 }
 
-function downloadFile() { showToast('正在下载...'); }
+function downloadFile() { 
+  if (currentProduct && currentProduct.fileUrl) {
+    window.location.href = currentProduct.fileUrl;
+  } else {
+    showToast('暂无资料');
+  }
+}
 function closeSuccess() { document.getElementById('successModal').classList.remove('show'); closeDetail(); }
 
 function showToast(msg) {
