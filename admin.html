@@ -179,12 +179,6 @@ tr:hover { background: #fafafa; }
   </div>
 </div>
 
-<!-- 加载中 -->
-<div class="loading" id="loading">
-  <div class="loading-spinner"></div>
-  <div class="loading-text" id="loadingText">同步中...</div>
-</div>
-
 <div class="toast" id="toast"></div>
 
 <script>
@@ -204,37 +198,42 @@ let cloudData = null;
 
 // 初始化
 async function init() {
-  showLoading('加载云端数据...');
-  try {
-    // 尝试从云端加载
-    const response = await fetch(DATA_URL + '?t=' + Date.now());
-    if (response.ok) {
-      const data = await response.json();
-      cloudData = data;
-      products = data.products || [];
-      if (products.length > 0) {
-        localStorage.setItem('products', JSON.stringify(products));
-        showToast('已从云端同步');
-      }
-    } else {
-      // 云端没有数据，从本地加载
-      products = JSON.parse(localStorage.getItem('products')) || [];
-    }
-  } catch (e) {
-    // 网络错误，从本地加载
-    products = JSON.parse(localStorage.getItem('products')) || [];
-    showToast('离线模式');
-  }
-  
+  // 先显示本地数据
+  products = JSON.parse(localStorage.getItem('products')) || [];
   initKfWechat();
   renderTable();
   updateStats();
-  hideLoading();
+  
+  // 后台加载云端数据
+  setTimeout(() => loadCloudData(), 500);
+}
+
+async function loadCloudData() {
+  try {
+    const response = await fetch(DATA_URL + '?t=' + Date.now());
+    if (response.ok) {
+      const data = await response.json();
+      products = data.products || [];
+      localStorage.setItem('products', JSON.stringify(products));
+      localStorage.setItem('kfWechat', data.kfWechat || '');
+      initKfWechat();
+      renderTable();
+      updateStats();
+    }
+  } catch (e) {
+    // 忽略
+  }
 }
 
 // 同步到云端
 async function syncToCloud() {
-  showLoading('正在同步到云端...');
+  const token = localStorage.getItem('githubToken');
+  if (!token) {
+    showTokenModal();
+    return;
+  }
+  
+  showToast('同步中...');
   
   const data = {
     products: products,
@@ -243,25 +242,17 @@ async function syncToCloud() {
   };
   
   try {
-    // 获取GitHub Token
-    const token = localStorage.getItem('githubToken');
-    if (!token) {
-      // 弹出设置Token弹窗
-      hideLoading();
-      showTokenModal();
-      return;
-    }
-    
     // 获取当前文件的SHA
-    const shaResponse = await fetch(`https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/data.json`, {
-      headers: { 'Authorization': 'token ' + token }
-    });
-    
     let sha = null;
-    if (shaResponse.ok) {
-      const shaData = await shaResponse.json();
-      sha = shaData.sha;
-    }
+    try {
+      const shaResponse = await fetch(`https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/data.json`, {
+        headers: { 'Authorization': 'token ' + token }
+      });
+      if (shaResponse.ok) {
+        const shaData = await shaResponse.json();
+        sha = shaData.sha;
+      }
+    } catch(e) {}
     
     // 上传文件
     const uploadResponse = await fetch(`https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/data.json`, {
@@ -278,23 +269,13 @@ async function syncToCloud() {
     });
     
     if (uploadResponse.ok) {
-      cloudData = data;
-      localStorage.setItem('products', JSON.stringify(products));
       showToast('同步成功！');
     } else {
-      const err = await uploadResponse.json();
-      if (err.message && err.message.includes('Bad credentials')) {
-        showToast('Token无效，请重新设置');
-        showTokenModal();
-      } else {
-        showToast('同步失败');
-      }
+      showToast('同步失败');
     }
   } catch (e) {
-    showToast('网络错误，同步失败');
+    showToast('同步失败');
   }
-  
-  hideLoading();
 }
 
 // 显示Token设置弹窗
@@ -467,16 +448,6 @@ function saveKfWechat() {
   initKfWechat();
   closeKfModal();
   syncToCloud();
-  showToast('保存成功');
-}
-
-function showLoading(text) {
-  document.getElementById('loadingText').textContent = text;
-  document.getElementById('loading').classList.add('show');
-}
-
-function hideLoading() {
-  document.getElementById('loading').classList.remove('show');
 }
 
 function showToast(msg) {
