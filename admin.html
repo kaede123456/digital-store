@@ -199,17 +199,34 @@ let cloudData = null;
 
 // 初始化
 async function init() {
-  // 先显示本地数据
+  // 先显示本地数据（这个最重要，刷新不丢失）
   products = JSON.parse(localStorage.getItem('products')) || [];
   initKfWechat();
   renderTable();
   updateStats();
   
-  // 后台加载云端数据
-  setTimeout(() => loadCloudData(), 500);
+  // 手动刷新时才从云端拉取
 }
 
 async function loadCloudData() {
+  try {
+    const response = await fetch(DATA_URL + '?t=' + Date.now());
+    if (response.ok) {
+      const data = await response.json();
+      products = data.products || [];
+      localStorage.setItem('products', JSON.stringify(products));
+      initKfWechat();
+      renderTable();
+      updateStats();
+    }
+  } catch (e) {
+    // 忽略
+  }
+}
+
+// 从云端拉取
+async function pullFromCloud() {
+  showToast('拉取中...');
   try {
     const response = await fetch(DATA_URL + '?t=' + Date.now());
     if (response.ok) {
@@ -220,9 +237,12 @@ async function loadCloudData() {
       initKfWechat();
       renderTable();
       updateStats();
+      showToast('已从云端拉取');
+    } else {
+      showToast('拉取失败');
     }
   } catch (e) {
-    // 忽略
+    showToast('拉取失败');
   }
 }
 
