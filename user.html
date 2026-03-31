@@ -179,14 +179,17 @@ let selectedPay = 'wechat';
 // 云端数据URL
 const DATA_URL = 'https://raw.githubusercontent.com/kaede123456/digital-store/main/data.json';
 
-// 页面加载时立即显示本地数据，再后台更新
+// 页面加载时立即显示本地数据
 function init() {
   // 先显示本地数据（秒开）
   products = JSON.parse(localStorage.getItem('products')) || [];
   renderProducts();
   
-  // 后台静默更新云端数据
-  setTimeout(() => loadCloudData(), 500);
+  // 只有首次访问时才从云端加载
+  if (!localStorage.getItem('userHasVisited')) {
+    localStorage.setItem('userHasVisited', 'true');
+    setTimeout(() => loadCloudData(), 500);
+  }
 }
 
 function refreshData() {
