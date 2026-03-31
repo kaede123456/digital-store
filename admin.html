@@ -142,10 +142,30 @@ tr:hover { background: #fafafa; }
       <div class="form-group"><label>价格（元）</label><input type="number" id="pPrice" placeholder="29.9" step="0.1"></div>
       <div class="form-group"><label>销量</label><input type="number" id="pSales" placeholder="0"></div>
     </div>
-    <div class="form-group"><label>图标（emoji）</label><input type="text" id="pImg" placeholder="📐"></div>
+    <div class="form-group">
+      <label>商品封面</label>
+      <div class="upload-box" onclick="document.getElementById('coverUpload').click()" style="min-height:120px;">
+        <img id="coverPreview" src="" style="display:none;max-width:100%;max-height:100px;border-radius:8px;">
+        <div id="coverPlaceholder" class="upload-placeholder">
+          <span style="font-size:24px;">🖼️</span>
+          <span style="font-size:12px;color:#999;margin-top:4px;">点击上传商品封面</span>
+        </div>
+      </div>
+      <input type="file" id="coverUpload" accept="image/*" style="display:none;" onchange="handleCoverUpload(this)">
+      <input type="hidden" id="pImg">
+    </div>
     <div class="form-row">
       <div class="form-group">
-        <label>微信收款码</label>
+        <label>或输入图标emoji</label>
+        <input type="text" id="pEmoji" placeholder="📐" style="width:100%;padding:10px;border:1px solid #e5e7eb;border-radius:8px;font-size:14px;">
+      </div>
+      <div class="form-group">
+        <label>商品分类</label>
+        <input type="text" id="pCategory" placeholder="如：考研资料" style="width:100%;padding:10px;border:1px solid #e5e7eb;border-radius:8px;font-size:14px;">
+      </div>
+    </div>
+    <div class="form-group">
+      <label>微信收款码</label>
         <div class="upload-box" onclick="document.getElementById('wechatUpload').click()">
           <img id="wechatPreview" src="" style="display:none;max-width:100%;border-radius:8px;">
           <div id="wechatPlaceholder" class="upload-placeholder">
@@ -311,6 +331,20 @@ function handleUpload(input, type) {
   reader.readAsDataURL(file);
 }
 
+function handleCoverUpload(input) {
+  const file = input.files[0];
+  if (!file) return;
+  
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    document.getElementById('pImg').value = e.target.result;
+    document.getElementById('coverPreview').src = e.target.result;
+    document.getElementById('coverPreview').style.display = 'block';
+    document.getElementById('coverPlaceholder').style.display = 'none';
+  };
+  reader.readAsDataURL(file);
+}
+
 function showPreview(id) {
   const p = products.find(x => x.id === id);
   if (!p) return;
@@ -365,20 +399,37 @@ function openForm(id) {
     document.getElementById('pTitle').value = p.title || '';
     document.getElementById('pPrice').value = p.price || '';
     document.getElementById('pSales').value = p.sales || 0;
-    document.getElementById('pImg').value = p.img || '📄';
+    document.getElementById('pEmoji').value = p.category || '';
+    document.getElementById('pCategory').value = p.category || '';
     document.getElementById('pFileUrl').value = p.fileUrl || '';
     document.getElementById('pDesc').value = p.desc || '';
     document.getElementById('delBtn').style.display = 'block';
+    
+    // 显示封面
+    if (p.img && (p.img.startsWith('data:') || p.img.startsWith('http'))) {
+      document.getElementById('pImg').value = p.img;
+      document.getElementById('coverPreview').src = p.img;
+      document.getElementById('coverPreview').style.display = 'block';
+      document.getElementById('coverPlaceholder').style.display = 'none';
+    } else {
+      document.getElementById('pImg').value = p.img || '📄';
+      document.getElementById('coverPreview').style.display = 'none';
+      document.getElementById('coverPlaceholder').style.display = 'flex';
+    }
+    
     showPreview(id);
   } else {
     document.getElementById('formTitle').textContent = '添加商品';
     document.getElementById('pTitle').value = '';
     document.getElementById('pPrice').value = '';
     document.getElementById('pSales').value = '0';
-    document.getElementById('pImg').value = '📄';
+    document.getElementById('pEmoji').value = '📄';
+    document.getElementById('pCategory').value = '';
+    document.getElementById('pImg').value = '';
     document.getElementById('pFileUrl').value = '';
     document.getElementById('pDesc').value = '';
     document.getElementById('delBtn').style.display = 'none';
+    
     // 清空图片预览
     document.getElementById('pWechatPay').value = '';
     document.getElementById('pAlipay').value = '';
@@ -386,6 +437,8 @@ function openForm(id) {
     document.getElementById('wechatPlaceholder').style.display = 'flex';
     document.getElementById('alipayPreview').style.display = 'none';
     document.getElementById('alipayPlaceholder').style.display = 'flex';
+    document.getElementById('coverPreview').style.display = 'none';
+    document.getElementById('coverPlaceholder').style.display = 'flex';
   }
   document.getElementById('modal').classList.add('show');
 }
@@ -396,7 +449,8 @@ function saveProduct() {
   const title = document.getElementById('pTitle').value.trim();
   const price = parseFloat(document.getElementById('pPrice').value);
   const sales = parseInt(document.getElementById('pSales').value) || 0;
-  const img = document.getElementById('pImg').value.trim() || '📄';
+  const img = document.getElementById('pImg').value || document.getElementById('pEmoji').value.trim() || '📄';
+  const category = document.getElementById('pCategory').value.trim();
   const wechatPay = document.getElementById('pWechatPay').value;
   const alipay = document.getElementById('pAlipay').value;
   const fileUrl = document.getElementById('pFileUrl').value.trim();
@@ -406,10 +460,10 @@ function saveProduct() {
   
   if (editingId) {
     const p = products.find(x => x.id === editingId);
-    if (p) Object.assign(p, { title, price, sales, img, wechatPay, alipay, fileUrl, desc });
+    if (p) Object.assign(p, { title, price, sales, img, category, wechatPay, alipay, fileUrl, desc });
     showToast('已更新');
   } else {
-    products.push({ id: Date.now(), title, price, sales, img, wechatPay, alipay, fileUrl, desc });
+    products.push({ id: Date.now(), title, price, sales, img, category, wechatPay, alipay, fileUrl, desc });
     showToast('已添加');
   }
   
