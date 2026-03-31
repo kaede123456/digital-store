@@ -1,17 +1,5 @@
 {
-  "products": [
-    {
-      "id": 2,
-      "title": "考研英语词汇5500",
-      "price": 9.9,
-      "sales": 2341,
-      "img": "📖",
-      "desc": "考研英语大纲词汇",
-      "wechatPay": "",
-      "alipay": "",
-      "fileUrl": ""
-    }
-  ],
+  "products": [],
   "kfWechat": "1",
-  "updatedAt": "2026-03-31T06:46:50.025Z"
+  "updatedAt": "2026-03-31T06:46:52.757Z"
 }
