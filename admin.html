@@ -20,10 +20,15 @@ body { font-family: 'Inter', -apple-system, sans-serif; background: #f0f2f5; col
 .stat-icon.blue { background: #f0f5ff; }
 .stat-info .num { font-size: 24px; font-weight: 700; }
 .stat-info .label { font-size: 13px; color: #999; margin-top: 2px; }
-.toolbar { background: #fff; border-radius: 12px; padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+.toolbar { background: #fff; border-radius: 12px; padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
 .search-box { display: flex; align-items: center; gap: 8px; background: #f5f7fa; padding: 8px 14px; border-radius: 8px; }
 .search-box input { border: none; outline: none; background: transparent; font-size: 14px; width: 200px; }
-.add-btn { background: #e54d00; color: #fff; border: none; padding: 10px 20px; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; }
+.btn-group { display: flex; gap: 10px; }
+.btn { padding: 10px 16px; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; border: none; }
+.btn-sync { background: #52c41a; color: #fff; }
+.btn-sync:hover { background: #3d9e19; }
+.btn-add { background: #e54d00; color: #fff; }
+.btn-add:hover { background: #d94400; }
 .table-box { background: #fff; border-radius: 12px; overflow: hidden; }
 table { width: 100%; border-collapse: collapse; }
 th, td { padding: 14px 16px; text-align: left; border-bottom: 1px solid #f0f0f0; }
@@ -58,13 +63,18 @@ tr:hover { background: #fafafa; }
 .btn-delete { background: #fff; color: #ff4d4f; border: 1px solid #ff4d4f; display: none; }
 .toast { position: fixed; top: 24px; left: 50%; transform: translateX(-50%) translateY(-20px); background: #333; color: #fff; padding: 12px 24px; border-radius: 8px; font-size: 14px; z-index: 9999; opacity: 0; pointer-events: none; transition: all 0.3s; }
 .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-.tip { font-size: 12px; color: #999; margin-top: 4px; }
 .upload-box { border: 2px dashed #e5e7eb; border-radius: 8px; padding: 20px; text-align: center; cursor: pointer; transition: all 0.2s; background: #fafafa; }
 .upload-box:hover { border-color: #e54d00; background: #fff8f5; }
 .upload-placeholder { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 10px; }
+.loading { position: fixed; inset: 0; background: rgba(255,255,255,0.9); display: none; align-items: center; justify-content: center; z-index: 9998; flex-direction: column; gap: 16px; }
+.loading.show { display: flex; }
+.loading-spinner { width: 40px; height: 40px; border: 3px solid #f0f0f0; border-top-color: #e54d00; border-radius: 50%; animation: spin 1s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.loading-text { font-size: 14px; color: #666; }
 @media (max-width: 768px) {
   .main { padding: 16px; }
   .form-row { grid-template-columns: 1fr; }
+  .toolbar { flex-direction: column; }
 }
 </style>
 </head>
@@ -85,11 +95,18 @@ tr:hover { background: #fafafa; }
       <div class="stat-icon green">💰</div>
       <div class="stat-info"><div class="num" id="totalSales">0</div><div class="label">总销量</div></div>
     </div>
+    <div class="stat-card">
+      <div class="stat-icon blue">💬</div>
+      <div class="stat-info"><div class="num" id="kfWechatDisplay">未设置</div><div class="label">客服微信</div></div>
+    </div>
   </div>
 
   <div class="toolbar">
     <div class="search-box"><span>🔍</span><input type="text" placeholder="搜索商品..." oninput="renderTable()"></div>
-    <button class="add-btn" onclick="openKfModal()">⚙️ 设置客服微信</button>
+    <div class="btn-group">
+      <button class="btn btn-sync" onclick="syncToCloud()">☁️ 同步到云端</button>
+      <button class="btn btn-add" onclick="openForm()">+ 添加商品</button>
+    </div>
   </div>
   
   <!-- 客服微信设置弹窗 -->
@@ -99,11 +116,11 @@ tr:hover { background: #fafafa; }
       <div class="form-group">
         <label>客服微信</label>
         <input type="text" id="kfWechatInput" placeholder="请输入你的微信号">
-        <div class="tip">用户付款后将显示此微信</div>
+        <div style="font-size:12px;color:#999;margin-top:4px;">用户付款后将显示此微信</div>
       </div>
       <div class="form-btns">
         <button class="btn-cancel" onclick="closeKfModal()">取消</button>
-        <button class="btn-save" onclick="saveKfWechat()">保存</button>
+        <button class="btn-save" onclick="saveKfWechat()">保存并同步</button>
       </div>
     </div>
   </div>
@@ -152,90 +169,146 @@ tr:hover { background: #fafafa; }
         <input type="hidden" id="pAlipay">
       </div>
     </div>
-    <div class="form-group"><label>发货图片URL（购买后发送）</label><input type="text" id="pFileUrl" placeholder="购买后发送的资料图片"></div>
+    <div class="form-group"><label>发货图片URL（购买后发送）</label><input type="text" id="pFileUrl" placeholder="资料下载链接或图片URL"></div>
     <div class="form-group"><label>商品描述</label><textarea id="pDesc" placeholder="描述商品特点..."></textarea></div>
     <div class="form-btns">
       <button class="btn-delete" id="delBtn" onclick="deleteProduct()">删除</button>
       <button class="btn-cancel" onclick="closeForm()">取消</button>
-      <button class="btn-save" onclick="saveProduct()">保存</button>
+      <button class="btn-save" onclick="saveProduct()">保存并同步</button>
     </div>
   </div>
+</div>
+
+<!-- 加载中 -->
+<div class="loading" id="loading">
+  <div class="loading-spinner"></div>
+  <div class="loading-text" id="loadingText">同步中...</div>
 </div>
 
 <div class="toast" id="toast"></div>
 
 <script>
-const defaults = [
-  { id: 1, title: '2026考研数学复习全书', price: 29.9, sales: 1523, img: '📐', desc: '包含高数、线代、概率论全部内容', wechatPay: '', alipay: '', fileUrl: '' },
-  { id: 2, title: '考研英语词汇5500', price: 9.9, sales: 2341, img: '📖', desc: '考研英语大纲词汇', wechatPay: '', alipay: '', fileUrl: '' },
-];
+// GitHub配置
+const CONFIG = {
+  owner: 'kaede123456',
+  repo: 'digital-store',
+  branch: 'main'
+};
 
-let products = JSON.parse(localStorage.getItem('products')) || defaults;
+// 云端数据URL
+const DATA_URL = `https://raw.githubusercontent.com/${CONFIG.owner}/${CONFIG.repo}/${CONFIG.branch}/data.json`;
 
-function init() {
-  products = products.map(p => ({
-    id: p.id, title: p.title, price: p.price, sales: p.sales || 0,
-    img: p.img || '📄', desc: p.desc || '', wechatPay: p.wechatPay || '',
-    alipay: p.alipay || '', fileUrl: p.fileUrl || ''
-  }));
-  localStorage.setItem('products', JSON.stringify(products));
+let products = [];
+let editingId = null;
+let cloudData = null;
+
+// 初始化
+async function init() {
+  showLoading('加载云端数据...');
+  try {
+    // 尝试从云端加载
+    const response = await fetch(DATA_URL + '?t=' + Date.now());
+    if (response.ok) {
+      const data = await response.json();
+      cloudData = data;
+      products = data.products || [];
+      if (products.length > 0) {
+        localStorage.setItem('products', JSON.stringify(products));
+        showToast('已从云端同步');
+      }
+    } else {
+      // 云端没有数据，从本地加载
+      products = JSON.parse(localStorage.getItem('products')) || [];
+    }
+  } catch (e) {
+    // 网络错误，从本地加载
+    products = JSON.parse(localStorage.getItem('products')) || [];
+    showToast('离线模式');
+  }
+  
+  initKfWechat();
   renderTable();
   updateStats();
+  hideLoading();
 }
 
-function updateStats() {
-  document.getElementById('totalProducts').textContent = products.length;
-  document.getElementById('totalSales').textContent = products.reduce((s, p) => s + (p.sales || 0), 0);
-}
-
-function renderTable() {
-  const search = document.querySelector('.search-box input').value.toLowerCase();
-  const filtered = products.filter(p => p.title.toLowerCase().includes(search) || p.desc.toLowerCase().includes(search));
-  const tbody = document.getElementById('tableBody');
-  tbody.innerHTML = filtered.map(p => `
-    <tr>
-      <td><div class="product-cell"><span style="font-size:32px;">${p.img}</span><div class="product-cell-info"><div class="name">${p.title}</div><div class="desc">${p.desc.substring(0,20)}...</div></div></div></td>
-      <td><span class="price">¥${p.price}</span></td>
-      <td>${p.sales}</td>
-      <td><div class="actions"><button class="edit" onclick="openForm(${p.id})">编辑</button><button class="delete" onclick="confirmDelete(${p.id})">删除</button></div></td>
-    </tr>
-  `).join('');
-}
-
-function openForm(id) {
-  editingId = id;
-  if (id) {
-    const p = products.find(x => x.id === id);
-    if (!p) return;
-    document.getElementById('formTitle').textContent = '编辑商品';
-    document.getElementById('pTitle').value = p.title;
-    document.getElementById('pPrice').value = p.price;
-    document.getElementById('pSales').value = p.sales;
-    document.getElementById('pImg').value = p.img;
-    document.getElementById('pWechatPay').value = p.wechatPay || '';
-    document.getElementById('pAlipay').value = p.alipay || '';
-    document.getElementById('pFileUrl').value = p.fileUrl || '';
-    document.getElementById('pDesc').value = p.desc;
-    document.getElementById('delBtn').style.display = 'block';
-    showPreview(id); // 回显收款码图片
-  } else {
-    document.getElementById('formTitle').textContent = '添加商品';
-    document.getElementById('pTitle').value = '';
-    document.getElementById('pPrice').value = '';
-    document.getElementById('pSales').value = '0';
-    document.getElementById('pImg').value = '📄';
-    document.getElementById('pWechatPay').value = '';
-    document.getElementById('pAlipay').value = '';
-    document.getElementById('pFileUrl').value = '';
-    document.getElementById('pDesc').value = '';
-    document.getElementById('delBtn').style.display = 'none';
+// 同步到云端
+async function syncToCloud() {
+  showLoading('正在同步到云端...');
+  
+  const data = {
+    products: products,
+    kfWechat: localStorage.getItem('kfWechat') || '',
+    updatedAt: new Date().toISOString()
+  };
+  
+  try {
+    // 获取GitHub Token
+    const token = localStorage.getItem('githubToken');
+    if (!token) {
+      // 弹出设置Token弹窗
+      hideLoading();
+      showTokenModal();
+      return;
+    }
+    
+    // 获取当前文件的SHA
+    const shaResponse = await fetch(`https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/data.json`, {
+      headers: { 'Authorization': 'token ' + token }
+    });
+    
+    let sha = null;
+    if (shaResponse.ok) {
+      const shaData = await shaResponse.json();
+      sha = shaData.sha;
+    }
+    
+    // 上传文件
+    const uploadResponse = await fetch(`https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/data.json`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': 'token ' + token,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        message: '同步商品数据',
+        content: btoa(unescape(encodeURIComponent(JSON.stringify(data, null, 2)))),
+        sha: sha
+      })
+    });
+    
+    if (uploadResponse.ok) {
+      cloudData = data;
+      localStorage.setItem('products', JSON.stringify(products));
+      showToast('同步成功！');
+    } else {
+      const err = await uploadResponse.json();
+      if (err.message && err.message.includes('Bad credentials')) {
+        showToast('Token无效，请重新设置');
+        showTokenModal();
+      } else {
+        showToast('同步失败');
+      }
+    }
+  } catch (e) {
+    showToast('网络错误，同步失败');
   }
-  document.getElementById('modal').classList.add('show');
+  
+  hideLoading();
 }
 
-function closeForm() { document.getElementById('modal').classList.remove('show'); editingId = null; }
+// 显示Token设置弹窗
+function showTokenModal() {
+  const token = localStorage.getItem('githubToken') || '';
+  const input = prompt('请输入GitHub Personal Access Token（用于同步数据到云端）\n\n获取方式：\n1. 打开 https://github.com/settings/tokens\n2. 点击 "Generate new token (classic)"\n3. 勾选 "repo" 权限\n4. 生成后复制token粘贴到这里\n\n注意：Token只会存储在本地浏览器中', token);
+  
+  if (input && input.trim()) {
+    localStorage.setItem('githubToken', input.trim());
+    showToast('Token已保存，请再次点击"同步到云端"');
+  }
+}
 
-// 图片上传处理（转base64）
+// 图片上传处理
 function handleUpload(input, type) {
   const file = input.files[0];
   if (!file) return;
@@ -258,7 +331,6 @@ function handleUpload(input, type) {
   reader.readAsDataURL(file);
 }
 
-// 回显已上传的图片
 function showPreview(id) {
   const p = products.find(x => x.id === id);
   if (!p) return;
@@ -278,13 +350,75 @@ function showPreview(id) {
   }
 }
 
+function updateStats() {
+  document.getElementById('totalProducts').textContent = products.length;
+  document.getElementById('totalSales').textContent = products.reduce((s, p) => s + (p.sales || 0), 0);
+}
+
+function renderTable() {
+  const search = document.querySelector('.search-box input').value.toLowerCase();
+  const filtered = products.filter(p => p.title.toLowerCase().includes(search) || p.desc.toLowerCase().includes(search));
+  const tbody = document.getElementById('tableBody');
+  
+  if (filtered.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:60px;color:#999;">暂无商品，点击上方按钮添加</td></tr>';
+    return;
+  }
+  
+  tbody.innerHTML = filtered.map(p => `
+    <tr>
+      <td><div class="product-cell"><span style="font-size:32px;">${p.img}</span><div class="product-cell-info"><div class="name">${p.title}</div><div class="desc">${(p.desc || '').substring(0,20)}${(p.desc || '').length > 20 ? '...' : ''}</div></div></div></td>
+      <td><span class="price">¥${p.price}</span></td>
+      <td>${p.sales || 0}</td>
+      <td><div class="actions"><button class="edit" onclick="openForm(${p.id})">编辑</button><button class="delete" onclick="confirmDelete(${p.id})">删除</button></div></td>
+    </tr>
+  `).join('');
+}
+
+function openForm(id) {
+  editingId = id;
+  
+  if (id) {
+    const p = products.find(x => x.id === id);
+    if (!p) return;
+    document.getElementById('formTitle').textContent = '编辑商品';
+    document.getElementById('pTitle').value = p.title || '';
+    document.getElementById('pPrice').value = p.price || '';
+    document.getElementById('pSales').value = p.sales || 0;
+    document.getElementById('pImg').value = p.img || '📄';
+    document.getElementById('pFileUrl').value = p.fileUrl || '';
+    document.getElementById('pDesc').value = p.desc || '';
+    document.getElementById('delBtn').style.display = 'block';
+    showPreview(id);
+  } else {
+    document.getElementById('formTitle').textContent = '添加商品';
+    document.getElementById('pTitle').value = '';
+    document.getElementById('pPrice').value = '';
+    document.getElementById('pSales').value = '0';
+    document.getElementById('pImg').value = '📄';
+    document.getElementById('pFileUrl').value = '';
+    document.getElementById('pDesc').value = '';
+    document.getElementById('delBtn').style.display = 'none';
+    // 清空图片预览
+    document.getElementById('pWechatPay').value = '';
+    document.getElementById('pAlipay').value = '';
+    document.getElementById('wechatPreview').style.display = 'none';
+    document.getElementById('wechatPlaceholder').style.display = 'flex';
+    document.getElementById('alipayPreview').style.display = 'none';
+    document.getElementById('alipayPlaceholder').style.display = 'flex';
+  }
+  document.getElementById('modal').classList.add('show');
+}
+
+function closeForm() { document.getElementById('modal').classList.remove('show'); editingId = null; }
+
 function saveProduct() {
   const title = document.getElementById('pTitle').value.trim();
   const price = parseFloat(document.getElementById('pPrice').value);
   const sales = parseInt(document.getElementById('pSales').value) || 0;
   const img = document.getElementById('pImg').value.trim() || '📄';
-  const wechatPay = document.getElementById('pWechatPay').value.trim();
-  const alipay = document.getElementById('pAlipay').value.trim();
+  const wechatPay = document.getElementById('pWechatPay').value;
+  const alipay = document.getElementById('pAlipay').value;
   const fileUrl = document.getElementById('pFileUrl').value.trim();
   const desc = document.getElementById('pDesc').value.trim();
   
@@ -298,35 +432,31 @@ function saveProduct() {
     products.push({ id: Date.now(), title, price, sales, img, wechatPay, alipay, fileUrl, desc });
     showToast('已添加');
   }
+  
   localStorage.setItem('products', JSON.stringify(products));
   closeForm();
   renderTable();
   updateStats();
+  
+  // 自动同步
+  syncToCloud();
 }
 
 function confirmDelete(id) { if (!confirm('确定删除？')) return; deleteProductById(id); }
-function deleteProductById(id) { products = products.filter(x => x.id !== id); localStorage.setItem('products', JSON.stringify(products)); renderTable(); updateStats(); showToast('已删除'); }
+function deleteProductById(id) { 
+  products = products.filter(x => x.id !== id); 
+  localStorage.setItem('products', JSON.stringify(products)); 
+  renderTable(); 
+  updateStats();
+  showToast('已删除');
+  syncToCloud();
+}
 function deleteProduct() { if (editingId) deleteProductById(editingId); closeForm(); }
 
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2000);
-}
-
-document.getElementById('modal').addEventListener('click', e => { if (e.target === document.getElementById('modal')) closeForm(); });
-
-// 客服微信设置
 function initKfWechat() {
   const kf = localStorage.getItem('kfWechat') || '';
   const display = document.getElementById('kfWechatDisplay');
   if (display) display.textContent = kf || '未设置';
-}
-
-function openKfModal() {
-  document.getElementById('kfWechatInput').value = localStorage.getItem('kfWechat') || '';
-  document.getElementById('kfModal').classList.add('show');
 }
 
 function closeKfModal() { document.getElementById('kfModal').classList.remove('show'); }
@@ -336,13 +466,30 @@ function saveKfWechat() {
   localStorage.setItem('kfWechat', wechat);
   initKfWechat();
   closeKfModal();
+  syncToCloud();
   showToast('保存成功');
 }
 
+function showLoading(text) {
+  document.getElementById('loadingText').textContent = text;
+  document.getElementById('loading').classList.add('show');
+}
+
+function hideLoading() {
+  document.getElementById('loading').classList.remove('show');
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+document.getElementById('modal').addEventListener('click', e => { if (e.target === document.getElementById('modal')) closeForm(); });
 document.getElementById('kfModal').addEventListener('click', e => { if (e.target === document.getElementById('kfModal')) closeKfModal(); });
 
 init();
-initKfWechat();
 </script>
 </body>
 </html>
