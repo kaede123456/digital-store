@@ -84,7 +84,10 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif
 <body>
 
 <div class="page active" id="homePage">
-  <div class="header"><h1>📚 资料库</h1><p>精选考研资料</p></div>
+  <div class="header" onclick="refreshData()" style="cursor:pointer;">
+    <h1>📚 资料库</h1>
+    <p>精选考研资料 <span id="updateTime" style="font-size:11px;color:#999;"></span></p>
+  </div>
   <div class="products" id="productsGrid"></div>
 </div>
 
@@ -186,24 +189,26 @@ function init() {
   setTimeout(() => loadCloudData(), 500);
 }
 
+function refreshData() {
+  showToast('刷新中...');
+  loadCloudData();
+}
+
 async function loadCloudData() {
   try {
     const response = await fetch(DATA_URL + '?t=' + Date.now());
     if (response.ok) {
       const data = await response.json();
-      const cloudProducts = data.products || [];
-      
-      // 如果云端数据比本地新，就更新
-      const localUpdated = localStorage.getItem('productsUpdated');
-      if (!localUpdated || new Date(data.updatedAt) > new Date(localUpdated)) {
-        products = cloudProducts;
-        localStorage.setItem('products', JSON.stringify(products));
-        localStorage.setItem('productsUpdated', data.updatedAt);
-        renderProducts();
-      }
+      products = data.products || [];
+      localStorage.setItem('products', JSON.stringify(products));
+      renderProducts();
+      document.getElementById('updateTime').textContent = '已更新';
+      setTimeout(() => {
+        document.getElementById('updateTime').textContent = '';
+      }, 2000);
     }
   } catch (e) {
-    // 忽略网络错误，使用本地数据
+    // 忽略
   }
 }
 
