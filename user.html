@@ -153,6 +153,15 @@ body{font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:#f5f5f5;
 let products=JSON.parse(localStorage.getItem('products'))||[];
 let currentProduct=null;
 let selectedPay='wechat';
+const DATA_URL='https://raw.githubusercontent.com/kaede123456/digital-store/main/data.json';
+
+// 首次加载时同步客服微信
+if(!localStorage.getItem('userKfSynced')){
+  fetch(DATA_URL+'?t='+Date.now()).then(r=>r.ok?r.json():null).then(d=>{
+    if(d&&d.kfWechat)localStorage.setItem('kfWechat',d.kfWechat);
+    localStorage.setItem('userKfSynced','1');
+  }).catch(()=>{});
+}
 
 function renderProducts(){
   const g=document.getElementById('productsGrid');
