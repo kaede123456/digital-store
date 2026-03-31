@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>商品管理后台</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { font-family: 'Inter', -apple-system, sans-serif; background: #f0f2f5; color: #1a1a1a; min-height: 100vh; }
@@ -197,31 +196,12 @@ let products = [];
 let editingId = null;
 let cloudData = null;
 
-// 初始化
-async function init() {
-  // 先显示本地数据（这个最重要，刷新不丢失）
+// 初始化 - 完全基于本地，秒开
+function init() {
   products = JSON.parse(localStorage.getItem('products')) || [];
   initKfWechat();
   renderTable();
   updateStats();
-  
-  // 手动刷新时才从云端拉取
-}
-
-async function loadCloudData() {
-  try {
-    const response = await fetch(DATA_URL + '?t=' + Date.now());
-    if (response.ok) {
-      const data = await response.json();
-      products = data.products || [];
-      localStorage.setItem('products', JSON.stringify(products));
-      initKfWechat();
-      renderTable();
-      updateStats();
-    }
-  } catch (e) {
-    // 忽略
-  }
 }
 
 // 从云端拉取
