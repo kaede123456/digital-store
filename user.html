@@ -169,9 +169,31 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif
 <div class="toast" id="toast"></div>
 
 <script>
-let products = JSON.parse(localStorage.getItem('products')) || [];
+let products = [];
 let currentProduct = null;
 let selectedPay = 'wechat';
+
+// 云端数据URL
+const DATA_URL = 'https://raw.githubusercontent.com/kaede123456/digital-store/main/data.json';
+
+async function loadProducts() {
+  try {
+    const response = await fetch(DATA_URL + '?t=' + Date.now());
+    if (response.ok) {
+      const data = await response.json();
+      products = data.products || [];
+      localStorage.setItem('products', JSON.stringify(products));
+    } else {
+      products = JSON.parse(localStorage.getItem('products')) || [];
+    }
+  } catch (e) {
+    products = JSON.parse(localStorage.getItem('products')) || [];
+  }
+  renderProducts();
+}
+
+// 页面加载时自动获取云端数据
+loadProducts();
 
 function renderProducts() {
   const grid = document.getElementById('productsGrid');
@@ -291,7 +313,6 @@ function showToast(msg) {
 
 document.getElementById('payModal').addEventListener('click', e => { if (e.target === document.getElementById('payModal')) document.getElementById('payModal').classList.remove('show'); });
 
-renderProducts();
 </script>
 </body>
 </html>
