@@ -1,17 +1,28 @@
 {
   "products": [
     {
-      "id": 1774941459649,
-      "title": "2027考研资料网盘群",
-      "price": 19.9,
-      "sales": 19,
-      "img": "📄",
+      "id": 1,
+      "title": "2026考研数学复习全书",
+      "price": 29.9,
+      "sales": 1523,
+      "img": "📐",
+      "desc": "包含高数、线代、概率论全部内容",
       "wechatPay": "",
       "alipay": "",
-      "fileUrl": "",
-      "desc": ""
+      "fileUrl": ""
+    },
+    {
+      "id": 2,
+      "title": "考研英语词汇5500",
+      "price": 9.9,
+      "sales": 2341,
+      "img": "📖",
+      "desc": "考研英语大纲词汇",
+      "wechatPay": "",
+      "alipay": "",
+      "fileUrl": ""
     }
   ],
   "kfWechat": "",
-  "updatedAt": "2026-03-31T07:17:39.650Z"
+  "updatedAt": "2026-03-31T07:10:00.000Z"
 }
