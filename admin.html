@@ -104,7 +104,8 @@ tr:hover { background: #fafafa; }
   <div class="toolbar">
     <div class="search-box"><span>🔍</span><input type="text" placeholder="搜索商品..." oninput="renderTable()"></div>
     <div class="btn-group">
-      <button class="btn btn-sync" onclick="syncToCloud()">☁️ 同步到云端</button>
+      <button class="btn btn-sync" onclick="openKfModal()">💬 客服微信</button>
+      <button class="btn btn-sync" onclick="syncToCloud()">☁️ 同步</button>
       <button class="btn btn-add" onclick="openForm()">+ 添加商品</button>
     </div>
   </div>
@@ -441,6 +442,11 @@ function initKfWechat() {
 }
 
 function closeKfModal() { document.getElementById('kfModal').classList.remove('show'); }
+
+function openKfModal() {
+  document.getElementById('kfWechatInput').value = localStorage.getItem('kfWechat') || '';
+  document.getElementById('kfModal').classList.add('show');
+}
 
 function saveKfWechat() {
   const wechat = document.getElementById('kfWechatInput').value.trim();
