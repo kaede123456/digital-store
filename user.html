@@ -176,24 +176,48 @@ let selectedPay = 'wechat';
 // 云端数据URL
 const DATA_URL = 'https://raw.githubusercontent.com/kaede123456/digital-store/main/data.json';
 
-async function loadProducts() {
+// 页面加载时立即显示本地数据，再后台更新
+function init() {
+  // 先显示本地数据（秒开）
+  products = JSON.parse(localStorage.getItem('products')) || [];
+  renderProducts();
+  
+  // 后台静默更新云端数据
+  setTimeout(() => loadCloudData(), 500);
+}
+
+async function loadCloudData() {
   try {
     const response = await fetch(DATA_URL + '?t=' + Date.now());
     if (response.ok) {
       const data = await response.json();
-      products = data.products || [];
-      localStorage.setItem('products', JSON.stringify(products));
-    } else {
-      products = JSON.parse(localStorage.getItem('products')) || [];
+      const cloudProducts = data.products || [];
+      
+      // 如果云端数据比本地新，就更新
+      const localUpdated = localStorage.getItem('productsUpdated');
+      if (!localUpdated || new Date(data.updatedAt) > new Date(localUpdated)) {
+        products = cloudProducts;
+        localStorage.setItem('products', JSON.stringify(products));
+        localStorage.setItem('productsUpdated', data.updatedAt);
+        renderProducts();
+      }
     }
   } catch (e) {
-    products = JSON.parse(localStorage.getItem('products')) || [];
+    // 忽略网络错误，使用本地数据
   }
-  renderProducts();
 }
 
-// 页面加载时自动获取云端数据
-loadProducts();
+// 下拉刷新
+let pullStart = 0;
+document.addEventListener('touchstart', e => { pullStart = e.touches[0].clientY; });
+document.addEventListener('touchend', e => {
+  if (pullStart < 50 && e.changedTouches[0].clientY - pullStart > 100) {
+    showToast('刷新中...');
+    loadCloudData().then(() => showToast('已是最新'));
+  }
+});
+
+init();
 
 function renderProducts() {
   const grid = document.getElementById('productsGrid');
