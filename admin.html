@@ -87,34 +87,27 @@ body{font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:#f5f5f5;
       <div class="form-group"><label>价格（元）</label><input type="number" id="price" placeholder="29.9" step="0.1"></div>
       <div class="form-group"><label>销量</label><input type="number" id="sales" placeholder="0"></div>
     </div>
-    <div class="form-group"><label>商品封面（上传到GitHub）</label>
+    <div class="form-group"><label>商品封面URL</label><input type="text" id="img" placeholder="粘贴图片链接或上传"></div>
+    <div class="form-group"><label>上传封面</label>
       <div class="upload-box" onclick="document.getElementById('coverInput').click()">
         <img id="coverPreview" style="display:none;">
-        <div class="upload-placeholder" id="coverPlaceholder"><span>🖼️</span><span>点击上传封面</span></div>
+        <div class="upload-placeholder" id="coverPlaceholder"><span>🖼️</span><span>点击上传图片</span></div>
       </div>
-      <input type="file" id="coverInput" accept="image/*" style="display:none;" onchange="uploadToGithub(this,'cover')">
-      <input type="hidden" id="img">
+      <input type="file" id="coverInput" accept="image/*" style="display:none;" onchange="uploadImg(this,'img')">
     </div>
     <div class="form-group"><label>商品描述</label><textarea id="desc" placeholder="描述..."></textarea></div>
     <div class="form-row">
-      <div class="form-group"><label>微信收款码</label>
+      <div class="form-group"><label>微信收款码URL</label><input type="text" id="wechatPay" placeholder="粘贴图片链接"></div>
+      <div class="form-group"><label>上传微信码</label>
         <div class="upload-box" onclick="document.getElementById('wechatInput').click()">
           <img id="wechatPreview" style="display:none;">
-          <div class="upload-placeholder" id="wechatPlaceholder"><span>💚</span><span>上传微信码</span></div>
+          <div class="upload-placeholder" id="wechatPlaceholder"><span>💚</span><span>上传</span></div>
         </div>
-        <input type="file" id="wechatInput" accept="image/*" style="display:none;" onchange="uploadToGithub(this,'wechat')">
-        <input type="hidden" id="wechatPay">
-      </div>
-      <div class="form-group"><label>支付宝收款码</label>
-        <div class="upload-box" onclick="document.getElementById('alipayInput').click()">
-          <img id="alipayPreview" style="display:none;">
-          <div class="upload-placeholder" id="alipayPlaceholder"><span>💙</span><span>上传支付宝码</span></div>
-        </div>
-        <input type="file" id="alipayInput" accept="image/*" style="display:none;" onchange="uploadToGithub(this,'alipay')">
-        <input type="hidden" id="alipay">
+        <input type="file" id="wechatInput" accept="image/*" style="display:none;" onchange="uploadImg(this,'wechatPay')">
       </div>
     </div>
-    <div class="form-group"><label>发货资料链接</label><input type="text" id="fileUrl" placeholder="购买后发送的资料链接"></div>
+    <div class="form-group"><label>支付宝收款码URL</label><input type="text" id="alipay" placeholder="粘贴图片链接"></div>
+    <div class="form-group"><label>发货资料链接</label><input type="text" id="fileUrl" placeholder="购买后发送的资料链接"></input></div>
     <div class="btns">
       <button class="delete-btn-form" id="delBtn" onclick="del()">删除</button>
       <button class="cancel-btn" onclick="closeModal()">取消</button>
@@ -137,16 +130,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:#f5f5f5;
 <div class="toast" id="toast"></div>
 
 <script>
-// GitHub配置
-const CONFIG = {
-  owner: 'kaede123456',
-  repo: 'digital-store',
-  branch: 'main'
-};
-
+const CONFIG = { owner: 'kaede123456', repo: 'digital-store', branch: 'main' };
 let products = [];
 let editingId = null;
-let githubToken = localStorage.getItem('githubToken') || '';
 
 function init() {
   products = JSON.parse(localStorage.getItem('products')) || [];
@@ -176,9 +162,9 @@ function render() {
 function openAdd() {
   editingId = null;
   document.getElementById('formTitle').textContent = '添加商品';
-  ['title', 'price', 'sales', 'desc', 'fileUrl', 'img', 'wechatPay', 'alipay'].forEach(id => document.getElementById(id).value = '');
-  ['coverPreview', 'wechatPreview', 'alipayPreview'].forEach(id => document.getElementById(id).style.display = 'none');
-  ['coverPlaceholder', 'wechatPlaceholder', 'alipayPlaceholder'].forEach(id => document.getElementById(id).style.display = 'flex');
+  ['title','price','sales','img','desc','wechatPay','alipay','fileUrl'].forEach(id => document.getElementById(id).value = '');
+  ['coverPreview','wechatPreview'].forEach(id => { document.getElementById(id).style.display = 'none'; });
+  ['coverPlaceholder','wechatPlaceholder'].forEach(id => { document.getElementById(id).style.display = 'flex'; });
   document.getElementById('delBtn').style.display = 'none';
   document.getElementById('modal').classList.add('show');
 }
@@ -191,91 +177,52 @@ function openEdit(id) {
   document.getElementById('title').value = p.title || '';
   document.getElementById('price').value = p.price || '';
   document.getElementById('sales').value = p.sales || 0;
-  document.getElementById('desc').value = p.desc || '';
-  document.getElementById('fileUrl').value = p.fileUrl || '';
   document.getElementById('img').value = p.img || '';
+  document.getElementById('desc').value = p.desc || '';
   document.getElementById('wechatPay').value = p.wechatPay || '';
   document.getElementById('alipay').value = p.alipay || '';
-  ['cover', 'wechat', 'alipay'].forEach(type => {
-    const val = type === 'cover' ? p.img : (type === 'wechat' ? p.wechatPay : p.alipay);
-    if (val && val.startsWith('http')) {
-      document.getElementById(type + 'Preview').src = val;
-      document.getElementById(type + 'Preview').style.display = 'block';
-      document.getElementById(type + 'Placeholder').style.display = 'none';
-    }
-  });
+  document.getElementById('fileUrl').value = p.fileUrl || '';
+  if (p.img && p.img.startsWith('http')) {
+    document.getElementById('coverPreview').src = p.img;
+    document.getElementById('coverPreview').style.display = 'block';
+    document.getElementById('coverPlaceholder').style.display = 'none';
+  }
   document.getElementById('delBtn').style.display = 'block';
   document.getElementById('modal').classList.add('show');
 }
 
 function closeModal() { document.getElementById('modal').classList.remove('show'); }
 
-// 上传到GitHub
-async function uploadToGithub(input, type) {
+// 上传图片到 imgbb (免费，无需API Key)
+async function uploadImg(input, fieldId) {
   const file = input.files[0];
   if (!file) return;
-  
-  // 先检查Token
-  if (!githubToken) {
-    githubToken = prompt('请先输入GitHub Token用于上传图片：\n\n获取方式：\n1. https://github.com/settings/tokens\n2. Generate new token (classic)\n3. 勾选 repo 权限\n4. 复制粘贴');
-    if (!githubToken) return;
-    localStorage.setItem('githubToken', githubToken.trim());
-    githubToken = githubToken.trim();
-  }
   
   // 本地预览
   const reader = new FileReader();
   reader.onload = function(e) {
-    document.getElementById(type + 'Preview').src = e.target.result;
-    document.getElementById(type + 'Preview').style.display = 'block';
-    document.getElementById(type + 'Placeholder').style.display = 'none';
+    if (fieldId === 'img') {
+      document.getElementById('coverPreview').src = e.target.result;
+      document.getElementById('coverPreview').style.display = 'block';
+      document.getElementById('coverPlaceholder').style.display = 'none';
+    }
   };
   reader.readAsDataURL(file);
   
   toast('上传中...');
   
-  // 生成文件名
-  const ext = file.name.split('.').pop() || 'png';
-  const filename = type + '_' + Date.now() + '.' + ext;
-  const path = 'images/' + filename;
-  
   try {
-    // 读取文件为base64
-    const arrayBuffer = await file.arrayBuffer();
-    const base64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
+    const formData = new FormData();
+    formData.append('image', file);
     
-    // 获取当前文件的SHA（如果存在）
-    let sha = null;
-    try {
-      const checkRes = await fetch(`https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${path}`, {
-        headers: { 'Authorization': 'token ' + githubToken }
-      });
-      if (checkRes.ok) {
-        const checkData = await checkRes.json();
-        sha = checkData.sha;
-      }
-    } catch(e) {}
-    
-    // 上传到GitHub
-    const uploadRes = await fetch(`https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${path}`, {
-      method: 'PUT',
-      headers: {
-        'Authorization': 'token ' + githubToken,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        message: 'Upload ' + filename,
-        content: base64,
-        sha: sha
-      })
+    const resp = await fetch('https://api.imgbb.com/1/upload?key=d36eb6591370ae7f5abb9f1d7c1e3d04', {
+      method: 'POST',
+      body: formData
     });
-    
-    if (uploadRes.ok) {
-      const data = await uploadRes.json();
-      const url = data.content.download_url;
-      if (type === 'cover') document.getElementById('img').value = url;
-      else if (type === 'wechat') document.getElementById('wechatPay').value = url;
-      else document.getElementById('alipay').value = url;
+    const data = await resp.json();
+    if (data.success) {
+      const url = data.data.url;
+      document.getElementById(fieldId).value = url;
       toast('上传成功！');
     } else {
       toast('上传失败');
@@ -289,18 +236,18 @@ function save() {
   const title = document.getElementById('title').value.trim();
   const price = parseFloat(document.getElementById('price').value);
   const sales = parseInt(document.getElementById('sales').value) || 0;
-  const img = document.getElementById('img').value || '📄';
+  const img = document.getElementById('img').value.trim() || '📄';
   const desc = document.getElementById('desc').value.trim();
+  const wechatPay = document.getElementById('wechatPay').value.trim();
+  const alipay = document.getElementById('alipay').value.trim();
   const fileUrl = document.getElementById('fileUrl').value.trim();
-  const wechatPay = document.getElementById('wechatPay').value;
-  const alipay = document.getElementById('alipay').value;
   if (!title || isNaN(price)) { toast('请填写名称和价格'); return; }
   if (editingId) {
     const p = products.find(x => x.id === editingId);
-    if (p) Object.assign(p, { title, price, sales, img, desc, fileUrl, wechatPay, alipay });
+    if (p) Object.assign(p, { title, price, sales, img, desc, wechatPay, alipay, fileUrl });
     toast('已更新');
   } else {
-    products.push({ id: Date.now(), title, price, sales, img, desc, fileUrl, wechatPay, alipay });
+    products.push({ id: Date.now(), title, price, sales, img, desc, wechatPay, alipay, fileUrl });
     toast('已添加');
   }
   localStorage.setItem('products', JSON.stringify(products));
@@ -329,11 +276,11 @@ function saveKf() {
 }
 
 async function sync() {
-  if (!githubToken) {
-    githubToken = prompt('请输入GitHub Token：\n\n获取：https://github.com/settings/tokens\n勾选repo权限');
-    if (!githubToken) return;
-    localStorage.setItem('githubToken', githubToken.trim());
-    githubToken = githubToken.trim();
+  const token = localStorage.getItem('githubToken');
+  if (!token) {
+    const t = prompt('请输入GitHub Token：\n\n获取：https://github.com/settings/tokens\n勾选repo权限');
+    if (!t || !t.trim()) return;
+    localStorage.setItem('githubToken', t.trim());
   }
   toast('同步中...');
   const data = { products, kfWechat: localStorage.getItem('kfWechat') || '', updatedAt: new Date().toISOString() };
@@ -341,7 +288,7 @@ async function sync() {
     let sha = null;
     try {
       const r = await fetch(`https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/data.json`, {
-        headers: { 'Authorization': 'token ' + githubToken }
+        headers: { 'Authorization': 'token ' + token }
       });
       if (r.ok) sha = (await r.json()).sha;
     } catch(e) {}
@@ -349,7 +296,7 @@ async function sync() {
     if (sha) body.sha = sha;
     const r = await fetch(`https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/data.json`, {
       method: 'PUT',
-      headers: { 'Authorization': 'token ' + githubToken, 'Content-Type': 'application/json' },
+      headers: { 'Authorization': 'token ' + token, 'Content-Type': 'application/json' },
       body: JSON.stringify(body)
     });
     toast(r.ok ? '同步成功' : '同步失败');
