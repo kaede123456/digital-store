@@ -87,12 +87,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:#f5f5f5;
       <div class="form-group"><label>价格（元）</label><input type="number" id="price" placeholder="29.9" step="0.1"></div>
       <div class="form-group"><label>销量</label><input type="number" id="sales" placeholder="0"></div>
     </div>
-    <div class="form-group"><label>商品封面（上传到云端）</label>
-      <div class="upload-box" id="coverBox" onclick="document.getElementById('coverInput').click()">
+    <div class="form-group"><label>商品封面（上传到GitHub）</label>
+      <div class="upload-box" onclick="document.getElementById('coverInput').click()">
         <img id="coverPreview" style="display:none;">
-        <div class="upload-placeholder" id="coverPlaceholder"><span>🖼️</span><span>点击上传</span></div>
+        <div class="upload-placeholder" id="coverPlaceholder"><span>🖼️</span><span>点击上传封面</span></div>
       </div>
-      <input type="file" id="coverInput" accept="image/*" style="display:none;" onchange="handleUpload(this,'cover')">
+      <input type="file" id="coverInput" accept="image/*" style="display:none;" onchange="uploadToGithub(this,'cover')">
       <input type="hidden" id="img">
     </div>
     <div class="form-group"><label>商品描述</label><textarea id="desc" placeholder="描述..."></textarea></div>
@@ -102,7 +102,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:#f5f5f5;
           <img id="wechatPreview" style="display:none;">
           <div class="upload-placeholder" id="wechatPlaceholder"><span>💚</span><span>上传微信码</span></div>
         </div>
-        <input type="file" id="wechatInput" accept="image/*" style="display:none;" onchange="handleUpload(this,'wechat')">
+        <input type="file" id="wechatInput" accept="image/*" style="display:none;" onchange="uploadToGithub(this,'wechat')">
         <input type="hidden" id="wechatPay">
       </div>
       <div class="form-group"><label>支付宝收款码</label>
@@ -110,7 +110,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:#f5f5f5;
           <img id="alipayPreview" style="display:none;">
           <div class="upload-placeholder" id="alipayPlaceholder"><span>💙</span><span>上传支付宝码</span></div>
         </div>
-        <input type="file" id="alipayInput" accept="image/*" style="display:none;" onchange="handleUpload(this,'alipay')">
+        <input type="file" id="alipayInput" accept="image/*" style="display:none;" onchange="uploadToGithub(this,'alipay')">
         <input type="hidden" id="alipay">
       </div>
     </div>
@@ -137,173 +137,234 @@ body{font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:#f5f5f5;
 <div class="toast" id="toast"></div>
 
 <script>
-let products=[];
-let editingId=null;
+// GitHub配置
+const CONFIG = {
+  owner: 'kaede123456',
+  repo: 'digital-store',
+  branch: 'main'
+};
 
-function init(){
-  products=JSON.parse(localStorage.getItem('products'))||[];
+let products = [];
+let editingId = null;
+let githubToken = localStorage.getItem('githubToken') || '';
+
+function init() {
+  products = JSON.parse(localStorage.getItem('products')) || [];
   render();
-  document.getElementById('kfDisplay').textContent=localStorage.getItem('kfWechat')||'未设置';
+  document.getElementById('kfDisplay').textContent = localStorage.getItem('kfWechat') || '未设置';
 }
 
-function render(){
-  const s=document.querySelector('input').value.toLowerCase();
-  const f=products.filter(p=>p.title.toLowerCase().includes(s));
-  const el=document.getElementById('products');
-  const empty=document.getElementById('empty');
-  if(f.length===0){el.style.display='none';empty.style.display='block';return;}
-  el.style.display='flex';empty.style.display='none';
-  el.innerHTML=f.map(p=>`
+function render() {
+  const s = document.querySelector('input').value.toLowerCase();
+  const f = products.filter(p => p.title.toLowerCase().includes(s));
+  const el = document.getElementById('products');
+  const empty = document.getElementById('empty');
+  if (f.length === 0) { el.style.display = 'none'; empty.style.display = 'block'; return; }
+  el.style.display = 'flex'; empty.style.display = 'none';
+  el.innerHTML = f.map(p => `
     <div class="product" onclick="openEdit(${p.id})">
-      <div class="product-img">${p.img&&p.img.startsWith('http')?'<img src="'+p.img+'">':(p.img||'📄')}</div>
+      <div class="product-img">${p.img && p.img.startsWith('http') ? '<img src="' + p.img + '">' : (p.img || '📄')}</div>
       <div class="product-info">
         <div class="product-title">${p.title}</div>
-        <div class="product-desc">${p.desc||''}</div>
-        <div class="product-bottom"><span class="product-price">¥${p.price}</span><span class="product-sales">${p.sales||0}人购</span></div>
+        <div class="product-desc">${p.desc || ''}</div>
+        <div class="product-bottom"><span class="product-price">¥${p.price}</span><span class="product-sales">${p.sales || 0}人购</span></div>
       </div>
     </div>
   `).join('');
 }
 
-function openAdd(){
-  editingId=null;
-  document.getElementById('formTitle').textContent='添加商品';
-  ['title','price','sales','desc','fileUrl','img','wechatPay','alipay'].forEach(id=>document.getElementById(id).value='');
-  ['coverPreview','wechatPreview','alipayPreview'].forEach(id=>document.getElementById(id).style.display='none');
-  ['coverPlaceholder','wechatPlaceholder','alipayPlaceholder'].forEach(id=>document.getElementById(id).style.display='flex');
-  document.getElementById('delBtn').style.display='none';
+function openAdd() {
+  editingId = null;
+  document.getElementById('formTitle').textContent = '添加商品';
+  ['title', 'price', 'sales', 'desc', 'fileUrl', 'img', 'wechatPay', 'alipay'].forEach(id => document.getElementById(id).value = '');
+  ['coverPreview', 'wechatPreview', 'alipayPreview'].forEach(id => document.getElementById(id).style.display = 'none');
+  ['coverPlaceholder', 'wechatPlaceholder', 'alipayPlaceholder'].forEach(id => document.getElementById(id).style.display = 'flex');
+  document.getElementById('delBtn').style.display = 'none';
   document.getElementById('modal').classList.add('show');
 }
 
-function openEdit(id){
-  const p=products.find(x=>x.id===id);
-  if(!p)return;
-  editingId=id;
-  document.getElementById('formTitle').textContent='编辑商品';
-  document.getElementById('title').value=p.title||'';
-  document.getElementById('price').value=p.price||'';
-  document.getElementById('sales').value=p.sales||0;
-  document.getElementById('desc').value=p.desc||'';
-  document.getElementById('fileUrl').value=p.fileUrl||'';
-  document.getElementById('img').value=p.img||'';
-  document.getElementById('wechatPay').value=p.wechatPay||'';
-  document.getElementById('alipay').value=p.alipay||'';
-  ['cover','wechat','alipay'].forEach(type=>{
-    const val=type==='cover'?p.img:(type==='wechat'?p.wechatPay:p.alipay);
-    if(val&&val.startsWith('http')){
-      document.getElementById(type+'Preview').src=val;
-      document.getElementById(type+'Preview').style.display='block';
-      document.getElementById(type+'Placeholder').style.display='none';
+function openEdit(id) {
+  const p = products.find(x => x.id === id);
+  if (!p) return;
+  editingId = id;
+  document.getElementById('formTitle').textContent = '编辑商品';
+  document.getElementById('title').value = p.title || '';
+  document.getElementById('price').value = p.price || '';
+  document.getElementById('sales').value = p.sales || 0;
+  document.getElementById('desc').value = p.desc || '';
+  document.getElementById('fileUrl').value = p.fileUrl || '';
+  document.getElementById('img').value = p.img || '';
+  document.getElementById('wechatPay').value = p.wechatPay || '';
+  document.getElementById('alipay').value = p.alipay || '';
+  ['cover', 'wechat', 'alipay'].forEach(type => {
+    const val = type === 'cover' ? p.img : (type === 'wechat' ? p.wechatPay : p.alipay);
+    if (val && val.startsWith('http')) {
+      document.getElementById(type + 'Preview').src = val;
+      document.getElementById(type + 'Preview').style.display = 'block';
+      document.getElementById(type + 'Placeholder').style.display = 'none';
     }
   });
-  document.getElementById('delBtn').style.display='block';
+  document.getElementById('delBtn').style.display = 'block';
   document.getElementById('modal').classList.add('show');
 }
 
-function closeModal(){document.getElementById('modal').classList.remove('show');}
+function closeModal() { document.getElementById('modal').classList.remove('show'); }
 
-async function handleUpload(input,type){
-  const file=input.files[0];
-  if(!file)return;
-  const reader=new FileReader();
-  reader.onload=function(e){
-    document.getElementById(type+'Preview').src=e.target.result;
-    document.getElementById(type+'Preview').style.display='block';
-    document.getElementById(type+'Placeholder').style.display='none';
+// 上传到GitHub
+async function uploadToGithub(input, type) {
+  const file = input.files[0];
+  if (!file) return;
+  
+  // 先检查Token
+  if (!githubToken) {
+    githubToken = prompt('请先输入GitHub Token用于上传图片：\n\n获取方式：\n1. https://github.com/settings/tokens\n2. Generate new token (classic)\n3. 勾选 repo 权限\n4. 复制粘贴');
+    if (!githubToken) return;
+    localStorage.setItem('githubToken', githubToken.trim());
+    githubToken = githubToken.trim();
+  }
+  
+  // 本地预览
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    document.getElementById(type + 'Preview').src = e.target.result;
+    document.getElementById(type + 'Preview').style.display = 'block';
+    document.getElementById(type + 'Placeholder').style.display = 'none';
   };
   reader.readAsDataURL(file);
-  // 上传到 catbox.moe
-  const formData=new FormData();
-  formData.append('reqtype','fileupload');
-  formData.append('time','1h');
-  formData.append('fileToUpload',file);
-  try{
-    const resp=await fetch('https://catbox.moe/user/api.php',{method:'POST',body:formData});
-    const url=await resp.text();
-    if(url.startsWith('http')){
-      if(type==='cover')document.getElementById('img').value=url;
-      else if(type==='wechat')document.getElementById('wechatPay').value=url;
-      else document.getElementById('alipay').value=url;
+  
+  toast('上传中...');
+  
+  // 生成文件名
+  const ext = file.name.split('.').pop() || 'png';
+  const filename = type + '_' + Date.now() + '.' + ext;
+  const path = 'images/' + filename;
+  
+  try {
+    // 读取文件为base64
+    const arrayBuffer = await file.arrayBuffer();
+    const base64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
+    
+    // 获取当前文件的SHA（如果存在）
+    let sha = null;
+    try {
+      const checkRes = await fetch(`https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${path}`, {
+        headers: { 'Authorization': 'token ' + githubToken }
+      });
+      if (checkRes.ok) {
+        const checkData = await checkRes.json();
+        sha = checkData.sha;
+      }
+    } catch(e) {}
+    
+    // 上传到GitHub
+    const uploadRes = await fetch(`https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${path}`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': 'token ' + githubToken,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        message: 'Upload ' + filename,
+        content: base64,
+        sha: sha
+      })
+    });
+    
+    if (uploadRes.ok) {
+      const data = await uploadRes.json();
+      const url = data.content.download_url;
+      if (type === 'cover') document.getElementById('img').value = url;
+      else if (type === 'wechat') document.getElementById('wechatPay').value = url;
+      else document.getElementById('alipay').value = url;
       toast('上传成功！');
-    }else{
+    } else {
       toast('上传失败');
     }
-  }catch(e){
+  } catch(e) {
     toast('上传失败');
   }
 }
 
-function save(){
-  const title=document.getElementById('title').value.trim();
-  const price=parseFloat(document.getElementById('price').value);
-  const sales=parseInt(document.getElementById('sales').value)||0;
-  const img=document.getElementById('img').value||'📄';
-  const desc=document.getElementById('desc').value.trim();
-  const fileUrl=document.getElementById('fileUrl').value.trim();
-  const wechatPay=document.getElementById('wechatPay').value;
-  const alipay=document.getElementById('alipay').value;
-  if(!title||isNaN(price)){toast('请填写名称和价格');return;}
-  if(editingId){
-    const p=products.find(x=>x.id===editingId);
-    if(p)Object.assign(p,{title,price,sales,img,desc,fileUrl,wechatPay,alipay});
+function save() {
+  const title = document.getElementById('title').value.trim();
+  const price = parseFloat(document.getElementById('price').value);
+  const sales = parseInt(document.getElementById('sales').value) || 0;
+  const img = document.getElementById('img').value || '📄';
+  const desc = document.getElementById('desc').value.trim();
+  const fileUrl = document.getElementById('fileUrl').value.trim();
+  const wechatPay = document.getElementById('wechatPay').value;
+  const alipay = document.getElementById('alipay').value;
+  if (!title || isNaN(price)) { toast('请填写名称和价格'); return; }
+  if (editingId) {
+    const p = products.find(x => x.id === editingId);
+    if (p) Object.assign(p, { title, price, sales, img, desc, fileUrl, wechatPay, alipay });
     toast('已更新');
-  }else{
-    products.push({id:Date.now(),title,price,sales,img,desc,fileUrl,wechatPay,alipay});
+  } else {
+    products.push({ id: Date.now(), title, price, sales, img, desc, fileUrl, wechatPay, alipay });
     toast('已添加');
   }
-  localStorage.setItem('products',JSON.stringify(products));
+  localStorage.setItem('products', JSON.stringify(products));
   closeModal();
   render();
 }
 
-function del(){
-  if(!editingId)return;
-  if(!confirm('确定删除？'))return;
-  products=products.filter(x=>x.id!==editingId);
-  localStorage.setItem('products',JSON.stringify(products));
+function del() {
+  if (!editingId) return;
+  if (!confirm('确定删除？')) return;
+  products = products.filter(x => x.id !== editingId);
+  localStorage.setItem('products', JSON.stringify(products));
   closeModal();
   render();
   toast('已删除');
 }
 
-function openKf(){document.getElementById('kfInput').value=localStorage.getItem('kfWechat')||'';document.getElementById('kfModal').classList.add('show');}
-function closeKf(){document.getElementById('kfModal').classList.remove('show');}
-function saveKf(){
-  const wechat=document.getElementById('kfInput').value.trim();
-  localStorage.setItem('kfWechat',wechat);
-  document.getElementById('kfDisplay').textContent=wechat||'未设置';
+function openKf() { document.getElementById('kfInput').value = localStorage.getItem('kfWechat') || ''; document.getElementById('kfModal').classList.add('show'); }
+function closeKf() { document.getElementById('kfModal').classList.remove('show'); }
+function saveKf() {
+  const wechat = document.getElementById('kfInput').value.trim();
+  localStorage.setItem('kfWechat', wechat);
+  document.getElementById('kfDisplay').textContent = wechat || '未设置';
   closeKf();
   toast('已保存');
 }
 
-async function sync(){
-  const token=localStorage.getItem('githubToken');
-  if(!token){
-    const t=prompt('请输入GitHub Token：\n\n获取：https://github.com/settings/tokens\n勾选repo权限');
-    if(t&&t.trim()){localStorage.setItem('githubToken',t.trim());toast('Token已保存');}else{toast('需要Token');}
-    return;
+async function sync() {
+  if (!githubToken) {
+    githubToken = prompt('请输入GitHub Token：\n\n获取：https://github.com/settings/tokens\n勾选repo权限');
+    if (!githubToken) return;
+    localStorage.setItem('githubToken', githubToken.trim());
+    githubToken = githubToken.trim();
   }
   toast('同步中...');
-  const data={products,kfWechat:localStorage.getItem('kfWechat')||'',updatedAt:new Date().toISOString()};
-  try{
-    let sha=null;
-    try{const r=await fetch('https://api.github.com/repos/kaede123456/digital-store/contents/data.json',{headers:{Authorization:'token '+token}});if(r.ok)sha=(await r.json()).sha;}catch(e){}
-    const body={message:'Sync',content:btoa(unescape(encodeURIComponent(JSON.stringify(data))))};
-    if(sha)body.sha=sha;
-    const r=await fetch('https://api.github.com/repos/kaede123456/digital-store/contents/data.json',{method:'PUT',headers:{Authorization:'token '+token,ContentType:'application/json'},body:JSON.stringify(body)});
-    toast(r.ok?'同步成功':'同步失败');
-  }catch(e){toast('同步失败');}
+  const data = { products, kfWechat: localStorage.getItem('kfWechat') || '', updatedAt: new Date().toISOString() };
+  try {
+    let sha = null;
+    try {
+      const r = await fetch(`https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/data.json`, {
+        headers: { 'Authorization': 'token ' + githubToken }
+      });
+      if (r.ok) sha = (await r.json()).sha;
+    } catch(e) {}
+    const body = { message: 'Sync', content: btoa(unescape(encodeURIComponent(JSON.stringify(data)))) };
+    if (sha) body.sha = sha;
+    const r = await fetch(`https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/data.json`, {
+      method: 'PUT',
+      headers: { 'Authorization': 'token ' + githubToken, 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    toast(r.ok ? '同步成功' : '同步失败');
+  } catch(e) { toast('同步失败'); }
 }
 
-function toast(msg){
-  const t=document.getElementById('toast');
-  t.textContent=msg;
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
   t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'),2000);
+  setTimeout(() => t.classList.remove('show'), 2000);
 }
 
-document.getElementById('modal').addEventListener('click',e=>{if(e.target.id==='modal')closeModal();});
-document.getElementById('kfModal').addEventListener('click',e=>{if(e.target.id==='kfModal')closeKf();});
+document.getElementById('modal').addEventListener('click', e => { if (e.target.id === 'modal') closeModal(); });
+document.getElementById('kfModal').addEventListener('click', e => { if (e.target.id === 'kfModal') closeKf(); });
 init();
 </script>
 </body>
