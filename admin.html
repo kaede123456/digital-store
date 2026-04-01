@@ -335,7 +335,7 @@ function saveKf(){
   toast('已保存');
 }
 
-// 同步到云端
+// 同步到云端（不包含图片数据）
 async function sync(){
   const token=localStorage.getItem('githubToken');
   if(!token){
@@ -345,7 +345,22 @@ async function sync(){
   }
   
   toast('同步中...');
-  const data={products,kfWechat:localStorage.getItem('kfWechat')||'',updatedAt:new Date().toISOString()};
+  
+  // 只同步文字数据，不包含base64图片
+  const cleanProducts = products.map(p => ({
+    id: p.id,
+    title: p.title,
+    price: p.price,
+    sales: p.sales || 0,
+    desc: p.desc || '',
+    fileUrl: p.fileUrl || '',
+    // 收款码和封面图片不同步（太大）
+    wechatPay: '',
+    alipay: '',
+    img: p.img && !p.img.startsWith('data:') ? p.img : '📄'
+  }));
+  
+  const data={products:cleanProducts,kfWechat:localStorage.getItem('kfWechat')||'',updatedAt:new Date().toISOString()};
   
   try{
     let sha=null;
@@ -354,14 +369,14 @@ async function sync(){
       if(r.ok)sha=(await r.json()).sha;
     }catch(e){}
     
-    const body={message:'Sync',content:btoa(unescape(encodeURIComponent(JSON.stringify(data))))};
+    const body={message:'Sync',content:btoa(unescape(encodeURIComponent(JSON.stringify(data)})});
     if(sha)body.sha=sha;
     
     const r=await fetch('https://api.github.com/repos/kaede123456/digital-store/contents/data.json',{
       method:'PUT',headers:{Authorization:'token '+token,ContentType:'application/json'},body:JSON.stringify(body)
     });
     
-    toast(r.ok?'同步成功':'同步失败');
+    toast(r.ok?'同步成功（图片需重新上传）':'同步失败');
   }catch(e){toast('同步失败');}
 }
 
