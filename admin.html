@@ -22,6 +22,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:#f5f5f5;
 .btn-kf{background:#1890ff;color:#fff}
 .products{display:flex;flex-direction:column;gap:12px}
 .product{background:#fff;border-radius:12px;padding:16px;display:flex;gap:12px;cursor:pointer}
+.product:active{opacity:0.8}
 .product-img{width:60px;height:60px;background:#fafafa;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:28px;flex-shrink:0;overflow:hidden}
 .product-img img{width:100%;height:100%;object-fit:cover}
 .product-info{flex:1;min-width:0}
@@ -31,28 +32,24 @@ body{font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:#f5f5f5;
 .product-price{font-size:16px;font-weight:600;color:#e54d00}
 .product-sales{font-size:12px;color:#999}
 .empty{text-align:center;padding:60px;color:#999}
-.modal{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;z-index:1000}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;z-index:1000;overflow-y:auto}
 .modal.show{display:flex}
-.form-box{background:#fff;width:90%;max-width:450px;border-radius:16px;padding:24px;max-height:90vh;overflow-y:auto}
+.form-box{background:#fff;width:90%;max-width:450px;border-radius:16px;padding:24px;max-height:90vh;overflow-y:auto;margin:20px auto}
 .form-box h2{font-size:17px;margin-bottom:16px;text-align:center}
 .form-group{margin-bottom:12px}
 .form-group label{display:block;font-size:13px;color:#666;margin-bottom:4px}
-.form-group input,.form-group textarea{width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;font-size:14px}
+.form-group input,.form-group textarea{width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;font-size:14px;box-sizing:border-box}
 .form-group textarea{resize:none;height:60px}
 .form-row{display:flex;gap:10px}
 .form-row .form-group{flex:1}
-.upload-box{border:2px dashed #ddd;border-radius:8px;padding:16px;text-align:center;cursor:pointer;background:#fafafa}
-.upload-box:hover{border-color:#e54d00}
-.upload-placeholder{display:flex;flex-direction:column;align-items:center;font-size:24px;color:#999}
-.upload-placeholder span{font-size:12px;margin-top:4px}
-.upload-box img{max-width:100%;max-height:80px;border-radius:8px}
 .btns{display:flex;gap:10px;margin-top:16px}
 .btns button{flex:1;padding:12px;border:none;border-radius:8px;font-size:14px;cursor:pointer}
 .save-btn{background:#e54d00;color:#fff}
 .cancel-btn{background:#f5f5f5;color:#666}
 .delete-btn-form{background:#fff;color:#ff4d4f;border:1px solid #ff4d4f;display:none}
-.toast{position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:10px 24px;border-radius:8px;font-size:14px;z-index:9999;opacity:0;transition:opacity .3s}
+.toast{position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:10px 24px;border-radius:8px;font-size:14px;z-index:9999;opacity:0;transition:opacity .3s;pointer-events:none}
 .toast.show{opacity:1}
+.help{font-size:12px;color:#999;margin-top:4px}
 </style>
 </head>
 <body>
@@ -76,38 +73,38 @@ body{font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:#f5f5f5;
   </div>
   
   <div class="products" id="products"></div>
-  <div class="empty" id="empty" style="display:none;">暂无商品</div>
+  <div class="empty" id="empty" style="display:none;">暂无商品，点击上方按钮添加</div>
 </div>
 
+<!-- 添加/编辑弹窗 -->
 <div class="modal" id="modal">
   <div class="form-box">
     <h2 id="formTitle">添加商品</h2>
+    
     <div class="form-group"><label>商品名称</label><input type="text" id="title" placeholder="例：考研数学复习全书"></div>
+    
     <div class="form-row">
       <div class="form-group"><label>价格（元）</label><input type="number" id="price" placeholder="29.9" step="0.1"></div>
       <div class="form-group"><label>销量</label><input type="number" id="sales" placeholder="0"></div>
     </div>
-    <div class="form-group"><label>商品封面URL</label><input type="text" id="img" placeholder="粘贴图片链接或上传"></div>
-    <div class="form-group"><label>上传封面</label>
-      <div class="upload-box" onclick="document.getElementById('coverInput').click()">
-        <img id="coverPreview" style="display:none;">
-        <div class="upload-placeholder" id="coverPlaceholder"><span>🖼️</span><span>点击上传图片</span></div>
-      </div>
-      <input type="file" id="coverInput" accept="image/*" style="display:none;" onchange="uploadImg(this,'img')">
+    
+    <div class="form-group"><label>商品封面URL</label>
+      <input type="text" id="img" placeholder="https://example.com/cover.jpg">
+      <div class="help">提示：去 <a href="https://imgse.com" target="_blank">imgse.com</a> 或 <a href="https://postimages.org" target="_blank">postimages.org</a> 上传图片，粘贴链接</div>
     </div>
-    <div class="form-group"><label>商品描述</label><textarea id="desc" placeholder="描述..."></textarea></div>
-    <div class="form-row">
-      <div class="form-group"><label>微信收款码URL</label><input type="text" id="wechatPay" placeholder="粘贴图片链接"></div>
-      <div class="form-group"><label>上传微信码</label>
-        <div class="upload-box" onclick="document.getElementById('wechatInput').click()">
-          <img id="wechatPreview" style="display:none;">
-          <div class="upload-placeholder" id="wechatPlaceholder"><span>💚</span><span>上传</span></div>
-        </div>
-        <input type="file" id="wechatInput" accept="image/*" style="display:none;" onchange="uploadImg(this,'wechatPay')">
-      </div>
+    
+    <div class="form-group"><label>商品描述</label><textarea id="desc" placeholder="描述商品特点..."></textarea></div>
+    
+    <div class="form-group"><label>微信收款码URL</label>
+      <input type="text" id="wechatPay" placeholder="https://example.com/wechat.jpg">
     </div>
-    <div class="form-group"><label>支付宝收款码URL</label><input type="text" id="alipay" placeholder="粘贴图片链接"></div>
-    <div class="form-group"><label>发货资料链接</label><input type="text" id="fileUrl" placeholder="购买后发送的资料链接"></input></div>
+    
+    <div class="form-group"><label>支付宝收款码URL</label>
+      <input type="text" id="alipay" placeholder="https://example.com/alipay.jpg">
+    </div>
+    
+    <div class="form-group"><label>发货资料链接</label><input type="text" id="fileUrl" placeholder="购买后发送的资料链接"></div>
+    
     <div class="btns">
       <button class="delete-btn-form" id="delBtn" onclick="del()">删除</button>
       <button class="cancel-btn" onclick="closeModal()">取消</button>
@@ -116,10 +113,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:#f5f5f5;
   </div>
 </div>
 
+<!-- 客服微信弹窗 -->
 <div class="modal" id="kfModal">
   <div class="form-box">
-    <h2>客服微信</h2>
-    <div class="form-group"><label>微信号</label><input type="text" id="kfInput" placeholder="请输入"></div>
+    <h2>设置客服微信</h2>
+    <div class="form-group"><label>客服微信号</label><input type="text" id="kfInput" placeholder="请输入微信号"></div>
     <div class="btns">
       <button class="cancel-btn" onclick="closeKf()">取消</button>
       <button class="save-btn" onclick="saveKf()">保存</button>
@@ -163,8 +161,6 @@ function openAdd() {
   editingId = null;
   document.getElementById('formTitle').textContent = '添加商品';
   ['title','price','sales','img','desc','wechatPay','alipay','fileUrl'].forEach(id => document.getElementById(id).value = '');
-  ['coverPreview','wechatPreview'].forEach(id => { document.getElementById(id).style.display = 'none'; });
-  ['coverPlaceholder','wechatPlaceholder'].forEach(id => { document.getElementById(id).style.display = 'flex'; });
   document.getElementById('delBtn').style.display = 'none';
   document.getElementById('modal').classList.add('show');
 }
@@ -182,66 +178,29 @@ function openEdit(id) {
   document.getElementById('wechatPay').value = p.wechatPay || '';
   document.getElementById('alipay').value = p.alipay || '';
   document.getElementById('fileUrl').value = p.fileUrl || '';
-  if (p.img && p.img.startsWith('http')) {
-    document.getElementById('coverPreview').src = p.img;
-    document.getElementById('coverPreview').style.display = 'block';
-    document.getElementById('coverPlaceholder').style.display = 'none';
-  }
   document.getElementById('delBtn').style.display = 'block';
   document.getElementById('modal').classList.add('show');
 }
 
 function closeModal() { document.getElementById('modal').classList.remove('show'); }
 
-// 上传图片到 imgbb (免费，无需API Key)
-async function uploadImg(input, fieldId) {
-  const file = input.files[0];
-  if (!file) return;
-  
-  // 本地预览
-  const reader = new FileReader();
-  reader.onload = function(e) {
-    if (fieldId === 'img') {
-      document.getElementById('coverPreview').src = e.target.result;
-      document.getElementById('coverPreview').style.display = 'block';
-      document.getElementById('coverPlaceholder').style.display = 'none';
-    }
-  };
-  reader.readAsDataURL(file);
-  
-  toast('上传中...');
-  
-  try {
-    const formData = new FormData();
-    formData.append('image', file);
-    
-    const resp = await fetch('https://api.imgbb.com/1/upload?key=d36eb6591370ae7f5abb9f1d7c1e3d04', {
-      method: 'POST',
-      body: formData
-    });
-    const data = await resp.json();
-    if (data.success) {
-      const url = data.data.url;
-      document.getElementById(fieldId).value = url;
-      toast('上传成功！');
-    } else {
-      toast('上传失败');
-    }
-  } catch(e) {
-    toast('上传失败');
-  }
-}
-
 function save() {
   const title = document.getElementById('title').value.trim();
   const price = parseFloat(document.getElementById('price').value);
   const sales = parseInt(document.getElementById('sales').value) || 0;
-  const img = document.getElementById('img').value.trim() || '📄';
+  const img = document.getElementById('img').value.trim();
   const desc = document.getElementById('desc').value.trim();
   const wechatPay = document.getElementById('wechatPay').value.trim();
   const alipay = document.getElementById('alipay').value.trim();
   const fileUrl = document.getElementById('fileUrl').value.trim();
+  
   if (!title || isNaN(price)) { toast('请填写名称和价格'); return; }
+  
+  // 验证URL格式
+  if (img && !img.startsWith('http')) { toast('封面URL格式错误'); return; }
+  if (wechatPay && !wechatPay.startsWith('http')) { toast('微信码URL格式错误'); return; }
+  if (alipay && !alipay.startsWith('http')) { toast('支付宝URL格式错误'); return; }
+  
   if (editingId) {
     const p = products.find(x => x.id === editingId);
     if (p) Object.assign(p, { title, price, sales, img, desc, wechatPay, alipay, fileUrl });
@@ -250,6 +209,7 @@ function save() {
     products.push({ id: Date.now(), title, price, sales, img, desc, wechatPay, alipay, fileUrl });
     toast('已添加');
   }
+  
   localStorage.setItem('products', JSON.stringify(products));
   closeModal();
   render();
