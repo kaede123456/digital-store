@@ -22,8 +22,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:#f5f5f5;
 .btn-kf{background:#1890ff;color:#fff}
 .products{display:flex;flex-direction:column;gap:12px}
 .product{background:#fff;border-radius:12px;padding:16px;display:flex;gap:12px;cursor:pointer}
-.product:active{opacity:0.8}
 .product-img{width:60px;height:60px;background:#fafafa;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:28px;flex-shrink:0;overflow:hidden}
+.product-img img{width:100%;height:100%;object-fit:cover}
 .product-info{flex:1;min-width:0}
 .product-title{font-size:15px;font-weight:500;margin-bottom:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .product-desc{font-size:12px;color:#999;margin-bottom:8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -41,12 +41,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:#f5f5f5;
 .form-group textarea{resize:none;height:60px}
 .form-row{display:flex;gap:10px}
 .form-row .form-group{flex:1}
-.upload-box{border:2px dashed #ddd;border-radius:8px;padding:16px;text-align:center;cursor:pointer;background:#fafafa;position:relative}
+.upload-box{border:2px dashed #ddd;border-radius:8px;padding:16px;text-align:center;cursor:pointer;background:#fafafa}
 .upload-box:hover{border-color:#e54d00}
 .upload-placeholder{display:flex;flex-direction:column;align-items:center;font-size:24px;color:#999}
 .upload-placeholder span{font-size:12px;margin-top:4px}
 .upload-box img{max-width:100%;max-height:80px;border-radius:8px}
-.uploading{position:absolute;inset:0;background:rgba(255,255,255,0.9);display:none;align-items:center;justify-content:center;font-size:13px;color:#fa8c16;border-radius:8px}
 .btns{display:flex;gap:10px;margin-top:16px}
 .btns button{flex:1;padding:12px;border:none;border-radius:8px;font-size:14px;cursor:pointer}
 .save-btn{background:#e54d00;color:#fff}
@@ -67,7 +66,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:#f5f5f5;
   <div class="kf-info">
     <span class="kf-label">客服微信：</span>
     <span class="kf-value" id="kfDisplay">未设置</span>
-    <button class="btn-kf" onclick="openKf()" style="margin-left:12px;">设置</button>
+    <button class="btn-kf" onclick="openKf()">设置</button>
   </div>
   
   <div class="toolbar">
@@ -77,58 +76,45 @@ body{font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:#f5f5f5;
   </div>
   
   <div class="products" id="products"></div>
-  <div class="empty" id="empty" style="display:none;">暂无商品，点击上方按钮添加</div>
+  <div class="empty" id="empty" style="display:none;">暂无商品</div>
 </div>
 
 <div class="modal" id="modal">
   <div class="form-box">
     <h2 id="formTitle">添加商品</h2>
-    
     <div class="form-group"><label>商品名称</label><input type="text" id="title" placeholder="例：考研数学复习全书"></div>
-    
     <div class="form-row">
       <div class="form-group"><label>价格（元）</label><input type="number" id="price" placeholder="29.9" step="0.1"></div>
       <div class="form-group"><label>销量</label><input type="number" id="sales" placeholder="0"></div>
     </div>
-    
-    <div class="form-group">
-      <label>商品封面（自动上传云端）</label>
-      <div class="upload-box" onclick="document.getElementById('coverInput').click()">
+    <div class="form-group"><label>商品封面（上传到云端）</label>
+      <div class="upload-box" id="coverBox" onclick="document.getElementById('coverInput').click()">
         <img id="coverPreview" style="display:none;">
-        <div class="upload-placeholder" id="coverPlaceholder"><span>🖼️</span><span>点击上传封面</span></div>
-        <div class="uploading" id="coverUploading">上传中...</div>
+        <div class="upload-placeholder" id="coverPlaceholder"><span>🖼️</span><span>点击上传</span></div>
       </div>
       <input type="file" id="coverInput" accept="image/*" style="display:none;" onchange="handleUpload(this,'cover')">
       <input type="hidden" id="img">
     </div>
-    
-    <div class="form-group"><label>商品描述</label><textarea id="desc" placeholder="描述商品特点..."></textarea></div>
-    
+    <div class="form-group"><label>商品描述</label><textarea id="desc" placeholder="描述..."></textarea></div>
     <div class="form-row">
-      <div class="form-group">
-        <label>微信收款码</label>
+      <div class="form-group"><label>微信收款码</label>
         <div class="upload-box" onclick="document.getElementById('wechatInput').click()">
           <img id="wechatPreview" style="display:none;">
           <div class="upload-placeholder" id="wechatPlaceholder"><span>💚</span><span>上传微信码</span></div>
-          <div class="uploading" id="wechatUploading">上传中...</div>
         </div>
         <input type="file" id="wechatInput" accept="image/*" style="display:none;" onchange="handleUpload(this,'wechat')">
         <input type="hidden" id="wechatPay">
       </div>
-      <div class="form-group">
-        <label>支付宝收款码</label>
+      <div class="form-group"><label>支付宝收款码</label>
         <div class="upload-box" onclick="document.getElementById('alipayInput').click()">
           <img id="alipayPreview" style="display:none;">
           <div class="upload-placeholder" id="alipayPlaceholder"><span>💙</span><span>上传支付宝码</span></div>
-          <div class="uploading" id="alipayUploading">上传中...</div>
         </div>
         <input type="file" id="alipayInput" accept="image/*" style="display:none;" onchange="handleUpload(this,'alipay')">
         <input type="hidden" id="alipay">
       </div>
     </div>
-    
     <div class="form-group"><label>发货资料链接</label><input type="text" id="fileUrl" placeholder="购买后发送的资料链接"></div>
-    
     <div class="btns">
       <button class="delete-btn-form" id="delBtn" onclick="del()">删除</button>
       <button class="cancel-btn" onclick="closeModal()">取消</button>
@@ -139,8 +125,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:#f5f5f5;
 
 <div class="modal" id="kfModal">
   <div class="form-box">
-    <h2>设置客服微信</h2>
-    <div class="form-group"><label>客服微信号</label><input type="text" id="kfInput" placeholder="请输入微信号"></div>
+    <h2>客服微信</h2>
+    <div class="form-group"><label>微信号</label><input type="text" id="kfInput" placeholder="请输入"></div>
     <div class="btns">
       <button class="cancel-btn" onclick="closeKf()">取消</button>
       <button class="save-btn" onclick="saveKf()">保存</button>
@@ -151,7 +137,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:#f5f5f5;
 <div class="toast" id="toast"></div>
 
 <script>
-const DATA_URL='https://raw.githubusercontent.com/kaede123456/digital-store/main/data.json';
 let products=[];
 let editingId=null;
 
@@ -162,15 +147,15 @@ function init(){
 }
 
 function render(){
-  const search=document.querySelector('input').value.toLowerCase();
-  const filtered=products.filter(p=>p.title.toLowerCase().includes(search));
+  const s=document.querySelector('input').value.toLowerCase();
+  const f=products.filter(p=>p.title.toLowerCase().includes(s));
   const el=document.getElementById('products');
   const empty=document.getElementById('empty');
-  if(filtered.length===0){el.style.display='none';empty.style.display='block';return;}
+  if(f.length===0){el.style.display='none';empty.style.display='block';return;}
   el.style.display='flex';empty.style.display='none';
-  el.innerHTML=filtered.map(p=>`
+  el.innerHTML=f.map(p=>`
     <div class="product" onclick="openEdit(${p.id})">
-      <div class="product-img">${p.img&&p.img.startsWith('http')?'<img src="'+p.img+'" style="width:100%;height:100%;object-fit:cover;">':(p.img||'📄')}</div>
+      <div class="product-img">${p.img&&p.img.startsWith('http')?'<img src="'+p.img+'">':(p.img||'📄')}</div>
       <div class="product-info">
         <div class="product-title">${p.title}</div>
         <div class="product-desc">${p.desc||''}</div>
@@ -183,15 +168,9 @@ function render(){
 function openAdd(){
   editingId=null;
   document.getElementById('formTitle').textContent='添加商品';
-  document.getElementById('title').value='';
-  document.getElementById('price').value='';
-  document.getElementById('sales').value='0';
-  document.getElementById('desc').value='';
-  document.getElementById('fileUrl').value='';
-  document.getElementById('img').value='';
-  document.getElementById('wechatPay').value='';
-  document.getElementById('alipay').value='';
-  clearPreviews();
+  ['title','price','sales','desc','fileUrl','img','wechatPay','alipay'].forEach(id=>document.getElementById(id).value='');
+  ['coverPreview','wechatPreview','alipayPreview'].forEach(id=>document.getElementById(id).style.display='none');
+  ['coverPlaceholder','wechatPlaceholder','alipayPlaceholder'].forEach(id=>document.getElementById(id).style.display='flex');
   document.getElementById('delBtn').style.display='none';
   document.getElementById('modal').classList.add('show');
 }
@@ -223,12 +202,6 @@ function openEdit(id){
 
 function closeModal(){document.getElementById('modal').classList.remove('show');}
 
-function clearPreviews(){
-  ['coverPreview','wechatPreview','alipayPreview'].forEach(id=>document.getElementById(id).style.display='none');
-  ['coverPlaceholder','wechatPlaceholder','alipayPlaceholder'].forEach(id=>document.getElementById(id).style.display='flex');
-  ['coverUploading','wechatUploading','alipayUploading'].forEach(id=>document.getElementById(id).style.display='none');
-}
-
 async function handleUpload(input,type){
   const file=input.files[0];
   if(!file)return;
@@ -239,33 +212,25 @@ async function handleUpload(input,type){
     document.getElementById(type+'Placeholder').style.display='none';
   };
   reader.readAsDataURL(file);
-  document.getElementById(type+'Uploading').style.display='flex';
+  // 上传到 catbox.moe
+  const formData=new FormData();
+  formData.append('reqtype','fileupload');
+  formData.append('time','1h');
+  formData.append('fileToUpload',file);
   try{
-    const formData=new FormData();
-    formData.append('smfile',file);
-    const response=await fetch('https://sm.ms/api/v2/upload',{method:'POST',body:formData});
-    const data=await response.json();
-    if(data.success){
-      const url=data.data.url;
+    const resp=await fetch('https://catbox.moe/user/api.php',{method:'POST',body:formData});
+    const url=await resp.text();
+    if(url.startsWith('http')){
       if(type==='cover')document.getElementById('img').value=url;
       else if(type==='wechat')document.getElementById('wechatPay').value=url;
       else document.getElementById('alipay').value=url;
       toast('上传成功！');
     }else{
-      const base64=e.target.result;
-      if(type==='cover')document.getElementById('img').value=base64;
-      else if(type==='wechat')document.getElementById('wechatPay').value=base64;
-      else document.getElementById('alipay').value=base64;
-      toast('上传失败，已保存本地');
+      toast('上传失败');
     }
   }catch(e){
-    const base64=reader.result;
-    if(type==='cover')document.getElementById('img').value=base64;
-    else if(type==='wechat')document.getElementById('wechatPay').value=base64;
-    else document.getElementById('alipay').value=base64;
-    toast('上传失败，已保存本地');
+    toast('上传失败');
   }
-  document.getElementById(type+'Uploading').style.display='none';
 }
 
 function save(){
@@ -301,10 +266,7 @@ function del(){
   toast('已删除');
 }
 
-function openKf(){
-  document.getElementById('kfInput').value=localStorage.getItem('kfWechat')||'';
-  document.getElementById('kfModal').classList.add('show');
-}
+function openKf(){document.getElementById('kfInput').value=localStorage.getItem('kfWechat')||'';document.getElementById('kfModal').classList.add('show');}
 function closeKf(){document.getElementById('kfModal').classList.remove('show');}
 function saveKf(){
   const wechat=document.getElementById('kfInput').value.trim();
@@ -317,8 +279,8 @@ function saveKf(){
 async function sync(){
   const token=localStorage.getItem('githubToken');
   if(!token){
-    const t=prompt('请输入GitHub Token：\n\n获取方式：\n1. https://github.com/settings/tokens\n2. Generate new token (classic)\n3. 勾选repo权限\n4. 复制token粘贴');
-    if(t&&t.trim()){localStorage.setItem('githubToken',t.trim());toast('Token已保存');}else{toast('需要Token才能同步');}
+    const t=prompt('请输入GitHub Token：\n\n获取：https://github.com/settings/tokens\n勾选repo权限');
+    if(t&&t.trim()){localStorage.setItem('githubToken',t.trim());toast('Token已保存');}else{toast('需要Token');}
     return;
   }
   toast('同步中...');
@@ -342,7 +304,6 @@ function toast(msg){
 
 document.getElementById('modal').addEventListener('click',e=>{if(e.target.id==='modal')closeModal();});
 document.getElementById('kfModal').addEventListener('click',e=>{if(e.target.id==='kfModal')closeKf();});
-
 init();
 </script>
 </body>
