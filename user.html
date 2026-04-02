@@ -157,20 +157,24 @@ body{font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:#f5f5f5;
 let products = JSON.parse(localStorage.getItem('products')) || [];
 let currentProduct = null;
 let selectedPay = 'wechat';
+const DATA_URL = 'https://raw.githubusercontent.com/kaede123456/digital-store/main/data.json';
 
 // 页面加载时立即显示本地数据
 renderProducts();
 
-// 后台静默同步客服微信（不阻塞页面）
-setTimeout(() => {
-  const cachedKf = localStorage.getItem('kfWechat');
-  if (!cachedKf) {
-    fetch('https://raw.githubusercontent.com/kaede123456/digital-store/main/data.json?t=' + Date.now())
-      .then(r => r.ok ? r.json() : null)
-      .then(d => { if (d && d.kfWechat) localStorage.setItem('kfWechat', d.kfWechat); })
-      .catch(() => {});
-  }
-}, 1000);
+// 后台静默同步云端数据
+fetch(DATA_URL + '?t=' + Date.now())
+  .then(r => r.ok ? r.json() : null)
+  .then(d => {
+    if (d && d.products && d.products.length > 0) {
+      // 云端数据更新本地
+      products = d.products;
+      localStorage.setItem('products', JSON.stringify(products));
+      if (d.kfWechat) localStorage.setItem('kfWechat', d.kfWechat);
+      renderProducts(); // 刷新显示
+    }
+  })
+  .catch(() => {});
 
 function renderProducts() {
   const g = document.getElementById('productsGrid');
