@@ -2,31 +2,34 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>资料库</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-body{font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:#f5f5f5;color:#1a1a1a;min-height:100vh;padding-bottom:70px;-webkit-font-smoothing:antialiased}
+body{font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:#f5f5f5;color:#1a1a1a;min-height:100vh;padding-bottom:70px}
 .page{display:none}.page.active{display:block}
 .header{background:#fff;padding:16px 20px;border-bottom:1px solid #eee;position:sticky;top:0;z-index:100}
 .header h1{font-size:20px;font-weight:600}
-.header p{font-size:13px;color:#999;margin-top:4px}
 .products{padding:16px;display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
 .product{background:#fff;border-radius:12px;overflow:hidden;cursor:pointer;transition:transform .2s}
 .product:active{transform:scale(0.98)}
-.product-img{width:100%;aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:48px;background:#fafafa}
+.product-img{width:100%;aspect-ratio:1;background:#fafafa;display:flex;align-items:center;justify-content:center;font-size:48px}
+.product-img img{width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .3s}
+.product-img img.loaded{opacity:1}
 .product-info{padding:12px}
 .product-title{font-size:14px;font-weight:500;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin-bottom:8px;min-height:40px}
 .product-bottom{display:flex;align-items:center;justify-content:space-between}
 .product-price{font-size:18px;font-weight:600;color:#e54d00}
 .product-sales{font-size:11px;color:#bbb}
+.loading{padding:40px;text-align:center;color:#999;font-size:14px}
 .detail{position:fixed;top:0;left:0;right:0;bottom:0;background:#fff;z-index:200;display:none;flex-direction:column}
 .detail.show{display:flex}
 .detail-header{padding:16px 20px;display:flex;align-items:center;gap:12px;border-bottom:1px solid #eee}
 .back-btn{width:32px;height:32px;border-radius:50%;background:#f5f5f5;display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer}
 .detail-title-bar{flex:1;font-size:16px;font-weight:500}
 .detail-content{flex:1;overflow-y:auto}
-.detail-img{width:100%;aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:80px;background:#fafafa}
+.detail-img{width:100%;aspect-ratio:1;background:#fafafa;display:flex;align-items:center;justify-content:center;font-size:80px}
+.detail-img img{width:100%;height:100%;object-fit:contain}
 .detail-body{padding:20px}
 .detail-price{font-size:28px;font-weight:600;color:#e54d00;margin-bottom:12px}
 .detail-desc{font-size:14px;color:#666;line-height:1.6}
@@ -80,7 +83,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:#f5f5f5;
 <body>
 
 <div class="page active" id="homePage">
-  <div class="header"><h1>📚 资料库</h1><p>精选考研资料</p></div>
+  <div class="header"><h1>📚 资料库</h1></div>
   <div class="products" id="productsGrid"></div>
 </div>
 
@@ -97,7 +100,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:#f5f5f5;
 <div class="detail" id="detailPage">
   <div class="detail-header"><div class="back-btn" onclick="closeDetail()">‹</div><div class="detail-title-bar">商品详情</div></div>
   <div class="detail-content">
-    <div class="detail-img" id="detailImg">📄</div>
+    <div class="detail-img" id="detailImg"></div>
     <div class="detail-body">
       <div class="detail-price" id="detailPrice">¥0</div>
       <div class="detail-desc" id="detailDesc"></div>
@@ -123,7 +126,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:#f5f5f5;
     <div class="pay-qr-img"><img id="qrImg" src="" alt="收款码"></div>
     <div class="pay-qr-amount" id="qrAmount">¥0</div>
     <div class="pay-qr-tip">截图 → 打开微信扫一扫 → 从相册选择</div>
-    <div style="background:#fff8e6;border-radius:8px;padding:10px;margin-top:10px;text-align:center;"><div style="font-size:13px;color:#fa8c16;">⚠️ 付款后截图，点击已完成付款，添加客服并发送截图</div></div>
+    <div style="background:#fff8e6;border-radius:8px;padding:10px;margin-top:10px;text-align:center;"><div style="font-size:13px;color:#fa8c16;">⚠️ 付款后截图，联系客服发送截图审核</div></div>
     <button class="done-btn" onclick="confirmPaid()">已完成付款</button>
   </div>
 </div>
@@ -150,92 +153,138 @@ body{font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:#f5f5f5;
 <div class="toast" id="toast"></div>
 
 <script>
-let products=JSON.parse(localStorage.getItem('products'))||[];
-let currentProduct=null;
-let selectedPay='wechat';
-const DATA_URL='https://raw.githubusercontent.com/kaede123456/digital-store/main/data.json';
+// 本地优先，数据存储在 localStorage
+let products = JSON.parse(localStorage.getItem('products')) || [];
+let currentProduct = null;
+let selectedPay = 'wechat';
 
-// 首次加载时同步客服微信
-if(!localStorage.getItem('userKfSynced')){
-  fetch(DATA_URL+'?t='+Date.now()).then(r=>r.ok?r.json():null).then(d=>{
-    if(d&&d.kfWechat)localStorage.setItem('kfWechat',d.kfWechat);
-    localStorage.setItem('userKfSynced','1');
-  }).catch(()=>{});
+// 页面加载时立即显示本地数据
+renderProducts();
+
+// 后台静默同步客服微信（不阻塞页面）
+setTimeout(() => {
+  const cachedKf = localStorage.getItem('kfWechat');
+  if (!cachedKf) {
+    fetch('https://raw.githubusercontent.com/kaede123456/digital-store/main/data.json?t=' + Date.now())
+      .then(r => r.ok ? r.json() : null)
+      .then(d => { if (d && d.kfWechat) localStorage.setItem('kfWechat', d.kfWechat); })
+      .catch(() => {});
+  }
+}, 1000);
+
+function renderProducts() {
+  const g = document.getElementById('productsGrid');
+  if (products.length === 0) {
+    g.innerHTML = '<div class="loading">暂无商品</div>';
+    g.style.gridTemplateColumns = '1fr';
+    return;
+  }
+  g.style.gridTemplateColumns = 'repeat(2, 1fr)';
+  g.innerHTML = products.map(p => {
+    let imgHtml = '📄';
+    if (p.img && p.img.startsWith('http')) {
+      imgHtml = `<img src="${p.img}" loading="lazy" onload="this.classList.add('loaded')" onerror="this.parentElement.innerHTML='📄'">`;
+    }
+    return `<div class="product" onclick="openDetail(${p.id})">
+      <div class="product-img">${imgHtml}</div>
+      <div class="product-info">
+        <div class="product-title">${p.title}</div>
+        <div class="product-bottom"><span class="product-price">¥${p.price}</span><span class="product-sales">${p.sales||0}人购</span></div>
+      </div>
+    </div>`;
+  }).join('');
 }
 
-function renderProducts(){
-  const g=document.getElementById('productsGrid');
-  if(products.length===0){g.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:60px;color:#999;">暂无商品</div>';return;}
-  g.innerHTML=products.map(p=>`<div class="product" onclick="openDetail(${p.id})"><div class="product-img">${p.img||'📄'}</div><div class="product-info"><div class="product-title">${p.title}</div><div class="product-bottom"><span class="product-price">¥${p.price}</span><span class="product-sales">${p.sales||0}人购</span></div></div></div>`).join('');
+function switchPage(p) {
+  document.querySelectorAll('.page').forEach(x => x.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(x => x.classList.remove('active'));
+  if (p === 'home') {
+    document.getElementById('homePage').classList.add('active');
+    document.querySelectorAll('.nav-item')[0].classList.add('active');
+  } else {
+    document.getElementById('profilePage').classList.add('active');
+    document.querySelectorAll('.nav-item')[1].classList.add('active');
+  }
 }
 
-function switchPage(p){
-  document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(x=>x.classList.remove('active'));
-  if(p==='home'){document.getElementById('homePage').classList.add('active');document.querySelectorAll('.nav-item')[0].classList.add('active');}
-  else{document.getElementById('profilePage').classList.add('active');document.querySelectorAll('.nav-item')[1].classList.add('active');}
-}
-
-function openDetail(id){
-  currentProduct=products.find(p=>p.id===id);
-  if(!currentProduct)return;
-  document.getElementById('detailImg').textContent=currentProduct.img||'📄';
-  document.getElementById('detailPrice').textContent='¥'+currentProduct.price;
-  document.getElementById('detailDesc').textContent=currentProduct.desc||'';
-  document.getElementById('payPrice').textContent='¥'+currentProduct.price;
+function openDetail(id) {
+  currentProduct = products.find(p => p.id === id);
+  if (!currentProduct) return;
+  
+  const imgEl = document.getElementById('detailImg');
+  if (currentProduct.img && currentProduct.img.startsWith('http')) {
+    imgEl.innerHTML = `<img src="${currentProduct.img}" style="width:100%;height:100%;object-fit:contain;">`;
+  } else {
+    imgEl.innerHTML = '📄';
+  }
+  
+  document.getElementById('detailPrice').textContent = '¥' + currentProduct.price;
+  document.getElementById('detailDesc').textContent = currentProduct.desc || '';
+  document.getElementById('payPrice').textContent = '¥' + currentProduct.price;
   document.getElementById('detailPage').classList.add('show');
 }
 
-function closeDetail(){document.getElementById('detailPage').classList.remove('show');}
-function openPay(){document.getElementById('payModal').classList.add('show');}
+function closeDetail() { document.getElementById('detailPage').classList.remove('show'); }
+function openPay() { document.getElementById('payModal').classList.add('show'); }
 
-function selectPay(el,type){
-  document.querySelectorAll('.pay-method').forEach(m=>{m.classList.remove('active');m.querySelector('.pay-check').textContent='';});
-  el.classList.add('active');el.querySelector('.pay-check').textContent='✓';selectedPay=type;
+function selectPay(el, type) {
+  document.querySelectorAll('.pay-method').forEach(m => {
+    m.classList.remove('active');
+    m.querySelector('.pay-check').textContent = '';
+  });
+  el.classList.add('active');
+  el.querySelector('.pay-check').textContent = '✓';
+  selectedPay = type;
 }
 
-function goToPayPage(){
-  if(!currentProduct)return;
-  const qrUrl=selectedPay==='wechat'?currentProduct.wechatPay:currentProduct.alipay;
-  if(!qrUrl){showToast('商家暂未设置该支付方式');return;}
+function goToPayPage() {
+  if (!currentProduct) return;
+  const qrUrl = selectedPay === 'wechat' ? currentProduct.wechatPay : currentProduct.alipay;
+  if (!qrUrl) { showToast('商家暂未设置该支付方式'); return; }
   document.getElementById('payModal').classList.remove('show');
-  document.getElementById('qrImg').src=qrUrl;
-  document.getElementById('qrTitle').textContent=selectedPay==='wechat'?'请使用微信扫码支付':'请使用支付宝扫码支付';
-  document.getElementById('qrAmount').textContent='¥'+currentProduct.price;
+  document.getElementById('qrImg').src = qrUrl;
+  document.getElementById('qrTitle').textContent = selectedPay === 'wechat' ? '请使用微信扫码支付' : '请使用支付宝扫码支付';
+  document.getElementById('qrAmount').textContent = '¥' + currentProduct.price;
   document.getElementById('payPage').classList.add('show');
 }
 
-function closePayPage(){document.getElementById('payPage').classList.remove('show');}
+function closePayPage() { document.getElementById('payPage').classList.remove('show'); }
 
-function confirmPaid(){
+function confirmPaid() {
   showToast('提交成功');
-  if(currentProduct){currentProduct.sales=(currentProduct.sales||0)+1;localStorage.setItem('products',JSON.stringify(products));}
+  if (currentProduct) {
+    currentProduct.sales = (currentProduct.sales || 0) + 1;
+    localStorage.setItem('products', JSON.stringify(products));
+  }
   closePayPage();
-  setTimeout(()=>{
-    const kf=localStorage.getItem('kfWechat')||'未设置';
-    document.getElementById('kfWechat').textContent=kf;
+  setTimeout(() => {
+    const kf = localStorage.getItem('kfWechat') || '未设置';
+    document.getElementById('kfWechat').textContent = kf;
     document.getElementById('successModal').classList.add('show');
-  },500);
+  }, 500);
 }
 
-function closeSuccess(){document.getElementById('successModal').classList.remove('show');closeDetail();}
-
-function copyWechat(){
-  const kf=localStorage.getItem('kfWechat')||'';
-  if(!kf){showToast('商家未设置客服微信');return;}
-  navigator.clipboard.writeText(kf).then(()=>showToast('已复制')).catch(()=>showToast('复制失败'));
+function closeSuccess() {
+  document.getElementById('successModal').classList.remove('show');
+  closeDetail();
 }
 
-function showToast(msg){
-  const t=document.getElementById('toast');
-  t.textContent=msg;
+function copyWechat() {
+  const kf = localStorage.getItem('kfWechat') || '';
+  if (!kf) { showToast('商家未设置客服微信'); return; }
+  navigator.clipboard.writeText(kf).then(() => showToast('已复制')).catch(() => showToast('复制失败'));
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
   t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'),2000);
+  setTimeout(() => t.classList.remove('show'), 2000);
 }
 
-document.getElementById('payModal').addEventListener('click',e=>{if(e.target===document.getElementById('payModal'))document.getElementById('payModal').classList.remove('show');});
-
-renderProducts();
+document.getElementById('payModal').addEventListener('click', e => {
+  if (e.target === document.getElementById('payModal')) document.getElementById('payModal').classList.remove('show');
+});
 </script>
 </body>
 </html>
